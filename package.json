@@ -79,6 +79,7 @@
     "task:getEthereumAddress": "hardhat task:getEthereumAddress",
     "task:mint": "hardhat task:mint",
     "task:deployERC20": "hardhat task:deployERC20",
+    "task:deployFheordleFactory": "hardhat task:deployFheordleFactory",
     "task:accounts": "hardhat task:accounts",
     "fhevm:start": "docker run -i -p 8545:8545 --rm --name fhevm ghcr.io/zama-ai/evmos-dev-node:v0.1.10",
     "fhevm:stop": "docker rm -f fhevm",
@@ -90,6 +91,7 @@
     "fhevm:faucet:dave": "docker exec -i fhevm faucet $(npx hardhat task:getEthereumAddressDave)"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.2"
+    "@openzeppelin/contracts": "^4.9.2",
+    "@openzeppelin/merkle-tree": "^1.0.5"
   }
 }

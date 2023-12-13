@@ -9,6 +9,7 @@ import "./tasks/accounts";
 import "./tasks/deployERC20";
 import "./tasks/getEthereumAddress";
 import "./tasks/mint";
+import "./tasks/deployFheordleFactory";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -69,7 +70,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
 }
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "local",
+  defaultNetwork: "zama",
   namedAccounts: {
     deployer: 0,
   },
