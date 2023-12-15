@@ -14,6 +14,7 @@
   "dependencies": {
     "@headlessui/react": "^1.4.2",
     "@heroicons/react": "^1.0.6",
+    "@metamask/providers": "^14.0.2",
     "@metamask/sdk-react-ui": "^0.14.1",
     "@tailwindcss/forms": "^0.5.2",
     "@testing-library/jest-dom": "^5.16.1",
@@ -27,6 +28,7 @@
     "classnames": "^2.3.1",
     "date-fns": "^2.29.1",
     "egoroof-blowfish": "^2.2.2",
+    "ethers": "^6.9.0",
     "fhevmjs": "^0.2.2",
     "grapheme-splitter": "1.0.4",
     "query-string": "^7.1.1",
@@ -36,9 +38,12 @@
     "react-div-100vh": "^0.7.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "tfhe": "^0.4.1",
     "typescript": "^4.5.4",
     "ua-parser-js": "^1.0.35",
-    "web-vitals": "^3.4.0"
+    "web-vitals": "^3.4.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   },
   "eslintConfig": {
     "extends": [

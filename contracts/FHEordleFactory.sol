@@ -18,20 +18,20 @@ contract FHEordleFactory is EIP712WithModifier {
     }
 
     function createGame(address _relayerAddr) public {
-        if (userLastContract[msg.sender] != address(0)) {
-            FHEordle game = FHEordle(userLastContract[msg.sender]);
-            require(
-                game.playerWon() || (game.nGuesses() == 5),
-                "Previous game has not ended"
-            );
-        }
+        // if (userLastContract[msg.sender] != address(0)) {
+        //     FHEordle game = FHEordle(userLastContract[msg.sender]);
+        //     require(
+        //         game.playerWon() || (game.nGuesses() == 5),
+        //         "Previous game has not ended"
+        //     );
+        // }
         userLastContract[msg.sender] = address(
             new FHEordle(
                 msg.sender,
                 _relayerAddr,
                 0,
-                0xd34274ed281b4de16823ef28eff9d2164ca3dc2ba8d38e1861bbf74597760d3e,
-                3
+                0x918fd5f641d6c8bb0c5e07a42f975969c2575250dc3fb743346d1a3c11728bdd,
+                5757
             )
         );
     }
@@ -43,8 +43,8 @@ contract FHEordleFactory is EIP712WithModifier {
                 msg.sender,
                 _relayerAddr,
                 3,
-                0xd34274ed281b4de16823ef28eff9d2164ca3dc2ba8d38e1861bbf74597760d3e,
-                3
+                0x918fd5f641d6c8bb0c5e07a42f975969c2575250dc3fb743346d1a3c11728bdd,
+                5757
             )
         );
     }

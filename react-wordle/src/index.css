@@ -61,6 +61,14 @@ svg.cursor-pointer:hover {
   transform: scale(1.2);
 }
 
+.mybutton {
+  transition: all var(--animation-speed-fast);
+}
+
+.mybutton:hover {
+  transform: scale(1.2);
+}
+
 .jiggle {
   animation: jiggle linear;
   animation-duration: var(--animation-speed-fast);

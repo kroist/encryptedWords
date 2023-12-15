@@ -23,26 +23,28 @@ contract FHEordle is EIP712WithModifier {
 
     bytes32[] private proof;
     bytes32 private root;
+    uint16 wordSetSz;
 
     bool public wordSubmitted;
     bool public gameStarted;
     bool public playerWon;
     bool public proofChecked;
+    bool public word1IdSet;
 
     constructor(
         address _playerAddr,
         address _relayerAddr,
         uint16 _word1Id,
         bytes32 _root,
-        uint16 wordSetSz
+        uint16 _wordSetSz
     ) EIP712WithModifier("Authorization token", "1") {
         relayerAddr = _relayerAddr;
         playerAddr = _playerAddr;
+        word1IdSet = false;
+        wordSetSz = _wordSetSz;
         if (_word1Id > 0) {
+            word1IdSet = true;
             word1Id = TFHE.asEuint16(_word1Id);
-        }
-        else {
-            word1Id = TFHE.rem(TFHE.randEuint16(), wordSetSz);
         }
         for (uint8 i = 0; i < 5; i++) {
             eqMaskGuess[i] = TFHE.asEuint8(0);
@@ -55,6 +57,13 @@ contract FHEordle is EIP712WithModifier {
         proofChecked = false;
         root = _root;
         word1 = 0;
+    }
+
+    function setWord1Id() public onlyPlayer {
+        if (!word1IdSet) {
+            word1IdSet = true;
+            word1Id = TFHE.rem(TFHE.randEuint16(), wordSetSz);
+        }
     }
 
     function getWord1Id(

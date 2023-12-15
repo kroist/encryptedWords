@@ -6,6 +6,7 @@ import { FHEordle, FHEordleFactory, FHEordle__factory } from "../../types";
 import { createTransaction } from "../utils";
 import { createInstances } from "../instance";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
+import { WORDS } from './wordslist';
 
 export function genProofAndRoot(values: any, key: any) : [string, string[]] {
   const tree = StandardMerkleTree.of(values, ["uint16", "uint32"]);
@@ -18,6 +19,17 @@ export function genProofAndRoot(values: any, key: any) : [string, string[]] {
   }
   return ["", []];
 }
+
+export const wordAtIdToNumber = (id: number) => {
+  const word = WORDS[id];
+  return (word.charCodeAt(0)-97)
+    + (word.charCodeAt(1)-97) * 26
+    + (word.charCodeAt(2)-97) * 26 * 26
+    + (word.charCodeAt(3)-97) * 26 * 26 * 26
+    + (word.charCodeAt(4)-97) * 26 * 26 * 26 * 26;
+}
+console.log(WORDS[3]);
+
 
 describe("FHEordle", function() {
   before(async function () {
@@ -32,11 +44,21 @@ describe("FHEordle", function() {
     // 1865110
     // id = 3
 
+    const wordsList = [];
+    const wordsSz = WORDS.length;
+    for (let i = 0; i < wordsSz; i++) {
+      wordsList.push([i, wordAtIdToNumber(i)]);
+    }
+    // console.log(wordsList);
+    // while (true) {
+    // }
+    const ourWord = wordsList[3][1];
+
     const [_root, proof] = genProofAndRoot(
-      [[4, 610123],
-      [3, 1865110],
-      [5, 3141341]], 3
+      wordsList, 3
     );
+    console.log(_root);
+    console.log(wordsSz);
 
     const fheordleFactoryFactory = await ethers.getContractFactory("FHEordleFactory");
     const factoryContract: FHEordleFactory = await fheordleFactoryFactory.connect(this.signers.alice).deploy();
@@ -65,11 +87,11 @@ describe("FHEordle", function() {
     // submit word letters (Bob-Relayer)
     {
       const bobContract = contract.connect(this.signers.bob);
-      const l0 = 0;
-      const l1 = 1;
-      const l2 = 3;
-      const l3 = 2;
-      const l4 = 4;
+      const l0 = ourWord%26;
+      const l1 = (ourWord/26)%26;
+      const l2 = (ourWord/26/26)%26;
+      const l3 = (ourWord/26/26/26)%26;
+      const l4 = (ourWord/26/26/26/26)%26;
       const mask = (1<<l0) | (1<<l1) | (1<<l2) | (1<<l3) | (1<<l4);
       const encl0 = this.instances.bob.encrypt16(l0);
       const encl1 = this.instances.bob.encrypt16(l1);
@@ -103,7 +125,7 @@ describe("FHEordle", function() {
       const l0 = 5;
       const l1 = 5;
       const l2 = 5;
-      const l3 = 2;
+      const l3 = 20;
       const l4 = 5;
       const mask = (1<<l0) | (1<<l1) | (1<<l2) | (1<<l3) | (1<<l4);
       const encl0 = this.instances.alice.encrypt16(l0);
@@ -132,16 +154,16 @@ describe("FHEordle", function() {
       const eqMask = this.instances.alice.decrypt(this.contractAddress, tx1[0]);
       const letterMask = this.instances.alice.decrypt(this.contractAddress, tx1[1]);
       expect(eqMask).to.equal(8);
-      expect(letterMask).to.equal(4);
+      expect(letterMask).to.equal(1<<20);
     }
 
     // guess 2
     {
       const l0 = 0;
       const l1 = 1;
-      const l2 = 3;
-      const l3 = 2;
-      const l4 = 4;
+      const l2 = 14;
+      const l3 = 20;
+      const l4 = 19;
       const mask = (1<<l0) | (1<<l1) | (1<<l2) | (1<<l3) | (1<<l4);
       const encl0 = this.instances.alice.encrypt16(l0);
       const encl1 = this.instances.alice.encrypt16(l1);
@@ -169,7 +191,7 @@ describe("FHEordle", function() {
       const eqMask = this.instances.alice.decrypt(this.contractAddress, tx1[0]);
       const letterMask = this.instances.alice.decrypt(this.contractAddress, tx1[1]);
       expect(eqMask).to.equal(31);
-      expect(letterMask).to.equal(31);
+      expect(letterMask).to.equal(1589251);
     }
 
     // claim win
@@ -188,7 +210,7 @@ describe("FHEordle", function() {
       const tx1 = await createTransaction(contract.revealWordAndStore);
       await tx1.wait();
       const word = await contract.word1();
-      expect(word).to.equal(0 + 1*26 + 3*26*26 + 2*26*26*26 + 4*26*26*26*26);
+      expect(word).to.equal(ourWord);
     }
 
     // check proof
@@ -199,7 +221,7 @@ describe("FHEordle", function() {
       expect(proofChecked);
     }
 
-  }).timeout(80000);
+  }).timeout(180000);
   
 
 });

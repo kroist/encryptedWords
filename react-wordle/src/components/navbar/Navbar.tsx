@@ -8,19 +8,24 @@ import {
 import { ENABLE_ARCHIVED_GAMES } from '../../constants/settings'
 import { GAME_TITLE } from '../../constants/strings'
 import { MetaMaskButton } from "@metamask/sdk-react-ui";
+import { SDKProvider } from '@metamask/sdk';
+import { 
+  startNewGame, 
+  callRelayerForWord 
+} from '../../lib/blockchain';
 
 type Props = {
   setIsInfoModalOpen: (value: boolean) => void
-  setIsStatsModalOpen: (value: boolean) => void
-  setIsDatePickerModalOpen: (value: boolean) => void
-  setIsSettingsModalOpen: (value: boolean) => void
+  setIsGameCreated: (value: boolean) => void
+  metamaskProvider: SDKProvider
+  isGameCreated: boolean
 }
 
 export const Navbar = ({
   setIsInfoModalOpen,
-  setIsStatsModalOpen,
-  setIsDatePickerModalOpen,
-  setIsSettingsModalOpen,
+  setIsGameCreated,
+  metamaskProvider,
+  isGameCreated,
 }: Props) => {
   return (
     <div className="navbar">
@@ -30,22 +35,49 @@ export const Navbar = ({
             className="h-6 w-6 cursor-pointer dark:stroke-white"
             onClick={() => setIsInfoModalOpen(true)}
           />
-          {ENABLE_ARCHIVED_GAMES && (
-            <CalendarIcon
-              className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white"
-              onClick={() => setIsDatePickerModalOpen(true)}
-            />
-          )}
+          <button
+            type="button"
+            className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+            onClick={async () => {
+              await startNewGame();
+              setIsGameCreated(true);
+            }}
+            style={
+              {
+                width:"140px",
+                backgroundColor:"red",
+                color:"white",
+              }
+            }
+          >
+            (Re)Start Game
+          </button>
+          {
+            isGameCreated &&
+            <button
+              type="button"
+              className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+              onClick={async () => {
+                await callRelayerForWord(metamaskProvider);
+                setIsGameCreated(true);
+              }}
+              style={
+                {
+                  width:"90px",
+                  backgroundColor:"blue",
+                  color:"white",
+                }
+              }
+            >
+              Set word
+            </button>
+          }
         </div>
         <p className="text-xl font-bold dark:text-white">{GAME_TITLE}</p>
         <div className="right-icons">
           <div>
             <MetaMaskButton theme={"light"} color="white"></MetaMaskButton>
           </div>
-          <CogIcon
-            className="h-6 w-6 cursor-pointer dark:stroke-white"
-            onClick={() => setIsSettingsModalOpen(true)}
-          />
         </div>
       </div>
       <hr></hr>

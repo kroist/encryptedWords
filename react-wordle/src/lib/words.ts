@@ -178,5 +178,28 @@ export const getIsLatestGame = () => {
   return parsed === null || !('d' in parsed)
 }
 
+export const wordAtId = (id: number) => {
+  return WORDS[id];
+}
+
+export const wordAtIdToNumber = (id: number) => {
+  const word = WORDS[id];
+  return (word.charCodeAt(0)-97)
+    + (word.charCodeAt(1)-97) * 26
+    + (word.charCodeAt(2)-97) * 26 * 26
+    + (word.charCodeAt(3)-97) * 26 * 26 * 26
+    + (word.charCodeAt(4)-97) * 26 * 26 * 26 * 26;
+}
+
+export const numberToWord = (number: number) => {
+  return String.fromCharCode(
+    number%26+97,
+    (number/26)%26+97,
+    (number/26/26)%26+97,
+    (number/26/26/26)%26+97,
+    (number/26/26/26/26)%26+97,
+  )
+}
+
 export const { solution, solutionGameDate, solutionIndex, tomorrow } =
   getSolution(getGameDate())

@@ -55,6 +55,12 @@ import {
   unicodeLength,
 } from './lib/words'
 
+import {
+  initFHE,
+  getIsGameFinished,
+  getIsGameCreated
+} from './lib/blockchain'
+
 function App() {
   const isLatestGame = getIsLatestGame()
   const gameDate = getGameDate()
@@ -64,8 +70,11 @@ function App() {
 
   const { showError: showErrorAlert, showSuccess: showSuccessAlert } =
     useAlert()
+  const [isFhevmInitialized, setFhevmInitialized] = useState(false);
   const [currentGuess, setCurrentGuess] = useState('')
   const [isGameWon, setIsGameWon] = useState(false)
+  const [isGameCreated, setIsGameCreated] = useState(false)
+  const [isGameFinished, setIsGameFinished] = useState(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
   const [isDatePickerModalOpen, setIsDatePickerModalOpen] = useState(false)
@@ -148,6 +157,26 @@ function App() {
     }
     changeChain();
   })
+
+  useEffect(() => {
+    initFHE(provider!).then(() => {
+      setFhevmInitialized(true);
+    })
+    .catch(() => setFhevmInitialized(false));
+  })
+
+  useEffect(() => {
+    getIsGameFinished().then(res => {
+      setIsGameFinished(res);
+    })
+  })
+
+  useEffect(() => {
+    getIsGameCreated().then(res => {
+      setIsGameCreated(res);
+    })
+  })
+
 
   useEffect(() => {
     // if no game state on load,
@@ -314,14 +343,17 @@ function App() {
     }
   }
 
+  if (!isFhevmInitialized)
+    return null;
+
   return (
     <Div100vh>
       <div className="flex h-full flex-col">
         <Navbar
           setIsInfoModalOpen={setIsInfoModalOpen}
-          setIsStatsModalOpen={setIsStatsModalOpen}
-          setIsDatePickerModalOpen={setIsDatePickerModalOpen}
-          setIsSettingsModalOpen={setIsSettingsModalOpen}
+          setIsGameCreated={setIsGameCreated}
+          metamaskProvider={provider!}
+          isGameCreated={isGameCreated}
         />
 
         {!isLatestGame && (
@@ -334,23 +366,35 @@ function App() {
         )}
 
         <div className="mx-auto flex w-full grow flex-col px-1 pt-2 pb-8 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
-          <div className="flex grow flex-col justify-center pb-6 short:pb-2">
-            <Grid
-              solution={solution}
-              guesses={guesses}
-              currentGuess={currentGuess}
-              isRevealing={isRevealing}
-              currentRowClassName={currentRowClass}
-            />
-          </div>
-          <Keyboard
-            onChar={onChar}
-            onDelete={onDelete}
-            onEnter={onEnter}
-            solution={solution}
-            guesses={guesses}
-            isRevealing={isRevealing}
-          />
+          
+          {
+            !isGameFinished &&
+            (
+              <div>
+              <div className="flex grow flex-col justify-center pb-6 short:pb-2">
+                <Grid
+                  solution={solution}
+                  guesses={guesses}
+                  currentGuess={currentGuess}
+                  isRevealing={isRevealing}
+                  currentRowClassName={currentRowClass}
+                />
+              </div>
+              <Keyboard
+                onChar={onChar}
+                onDelete={onDelete}
+                onEnter={onEnter}
+                solution={solution}
+                guesses={guesses}
+                isRevealing={isRevealing}
+              />
+              </div>
+            )
+          }
+          <p style={{
+            textAlign: "center",
+            marginTop: "30px",
+          }}>If you are not seeing some updates, refresh the page! The state is fully saved on blockchain</p>
           <InfoModal
             isOpen={isInfoModalOpen}
             handleClose={() => setIsInfoModalOpen(false)}
