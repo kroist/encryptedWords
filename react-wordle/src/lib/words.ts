@@ -7,6 +7,7 @@ import {
 } from 'date-fns'
 import { default as GraphemeSplitter } from 'grapheme-splitter'
 import queryString from 'query-string'
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 
 import { ENABLE_ARCHIVED_GAMES } from '../constants/settings'
 import { NOT_CONTAINED_MESSAGE, WRONG_SPOT_MESSAGE } from '../constants/strings'
@@ -199,6 +200,24 @@ export const numberToWord = (number: number) => {
     (number/26/26/26)%26+97,
     (number/26/26/26/26)%26+97,
   )
+}
+
+export const getProof = (id: number) => {
+  const wordsList = [];
+  const wordsSz = WORDS.length;
+  for (let i = 0; i < wordsSz; i++) {
+    wordsList.push([i, wordAtIdToNumber(i)]);
+  }
+  const tree = StandardMerkleTree.of(wordsList, ["uint16", "uint32"]);
+  const root = tree.root;
+  for (const [i, v] of tree.entries()) {
+    if (v[0] == id) {
+      const proof = tree.getProof(i);
+      return [root, proof];
+    }
+  }
+  return ["", []];
+
 }
 
 export const { solution, solutionGameDate, solutionIndex, tomorrow } =

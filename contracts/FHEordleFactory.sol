@@ -13,6 +13,9 @@ contract FHEordleFactory is EIP712WithModifier {
 
     mapping(address => address) public userLastContract;
 
+    mapping(address => uint32) public gamesWon;
+    mapping(address => bool) public claimedWin;
+
     constructor() EIP712WithModifier("Authorization token", "1") {
         creator = msg.sender;
     }
@@ -55,6 +58,16 @@ contract FHEordleFactory is EIP712WithModifier {
             return game.playerWon() || (game.nGuesses() == 5);
         }
         return true;
+    }
+
+    function mint() public {
+        if (userLastContract[msg.sender] != address(0)) {
+            address contractAddr = userLastContract[msg.sender];
+            FHEordle game = FHEordle(contractAddr);
+            require(game.playerWon() && game.proofChecked() && !claimedWin[contractAddr], "has to win and check proof");
+            claimedWin[contractAddr] = true;
+            gamesWon[msg.sender] += 1;
+        }
     }
 
 

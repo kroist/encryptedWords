@@ -20,6 +20,7 @@ contract FHEordle is EIP712WithModifier {
     uint8 public nGuesses;
     euint8[5] public eqMaskGuess;
     euint32[5] public letterMaskGuess;
+    euint16[5][5] public letterMaskGuessHist;
 
     bytes32[] private proof;
     bytes32 private root;
@@ -49,12 +50,17 @@ contract FHEordle is EIP712WithModifier {
         for (uint8 i = 0; i < 5; i++) {
             eqMaskGuess[i] = TFHE.asEuint8(0);
             letterMaskGuess[i] = TFHE.asEuint32(0);
+            // letterMaskGuessHist[i][0] = TFHE.asEuint16(0);
+            // letterMaskGuessHist[i][1] = TFHE.asEuint16(0);
+            // letterMaskGuessHist[i][2] = TFHE.asEuint16(0);
+            // letterMaskGuessHist[i][3] = TFHE.asEuint16(0);
+            // letterMaskGuessHist[i][4] = TFHE.asEuint16(0);
         }
         nGuesses = 0;
         wordSubmitted = false;
         gameStarted = false;
         playerWon = false;
-        proofChecked = false;
+        proofChecked = true;
         root = _root;
         word1 = 0;
     }
@@ -120,13 +126,13 @@ contract FHEordle is EIP712WithModifier {
         word1Letters[4] = l4;
         word1LettersMask = mask;
         wordSubmitted = true;
+        gameStarted = true;
     }
 
     function submitProof(bytes32[] calldata _proof) public onlyRelayer {
         require(wordSubmitted, "word not submitted");
         require(!gameStarted, "game started");
         proof = _proof;
-        gameStarted = true;
     }
 
     function guessWord1(
@@ -173,6 +179,11 @@ contract FHEordle is EIP712WithModifier {
             );
         eqMaskGuess[nGuesses] = eqMask;
         letterMaskGuess[nGuesses] = TFHE.and(word1LettersMask, letterMask);
+        letterMaskGuessHist[nGuesses][0] = l0;
+        letterMaskGuessHist[nGuesses][1] = l1;
+        letterMaskGuessHist[nGuesses][2] = l2;
+        letterMaskGuessHist[nGuesses][3] = l3;
+        letterMaskGuessHist[nGuesses][4] = l4;
 
         nGuesses += 1;
     }
@@ -187,6 +198,20 @@ contract FHEordle is EIP712WithModifier {
         return (
             TFHE.reencrypt(eqMaskGuess[guessN], publicKey),
             TFHE.reencrypt(letterMaskGuess[guessN], publicKey)
+        );
+    }
+
+    function getLetterGuess(uint8 guessN,
+        uint8 letterN,
+        bytes32 publicKey,
+        bytes calldata signature    
+    )
+        public view onlySignedPublicKey(publicKey, signature) onlyPlayer
+        returns (bytes memory) {
+        require(guessN < nGuesses, "canno exceed nGuesses");
+        require(letterN < 5, "cannot exceed 5");
+        return (
+            TFHE.reencrypt(letterMaskGuessHist[guessN][letterN], publicKey)
         );
     }
 

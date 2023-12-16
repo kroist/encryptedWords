@@ -3,21 +3,20 @@ import { unicodeSplit } from '../../lib/words'
 import { Cell } from './Cell'
 
 type Props = {
-  solution: string
-  guess: string
+  guess: [string, number, number]
   isRevealing?: boolean
 }
 
-export const CompletedRow = ({ solution, guess, isRevealing }: Props) => {
-  const statuses = getGuessStatuses(solution, guess)
-  const splitGuess = unicodeSplit(guess)
+export const CompletedRow = ({ guess, isRevealing }: Props) => {
+  const statuses = getGuessStatuses(guess)
+  const splitGuess = unicodeSplit(guess[0])
 
   return (
     <div className="mb-1 flex justify-center">
       {splitGuess.map((letter, i) => (
         <Cell
           key={i}
-          value={letter}
+          value={letter.toUpperCase()}
           status={statuses[i]}
           position={i}
           isRevealing={isRevealing}

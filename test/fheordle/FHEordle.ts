@@ -74,6 +74,12 @@ describe("FHEordle", function() {
     this.contractAddress = await contract.getAddress();
     this.instances = await createInstances(this.contractAddress, ethers, this.signers);
 
+    {
+      const tx = await createTransaction(contract.setWord1Id);
+      await tx.wait();
+      const word1IdSet = await contract.word1IdSet();
+      expect(word1IdSet);
+    }
 
     // get word id (Bob-Relayer)
     {

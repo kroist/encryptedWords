@@ -10,7 +10,7 @@ export const InfoModal = ({ isOpen, handleClose }: Props) => {
   return (
     <BaseModal title="How to play" isOpen={isOpen} handleClose={handleClose}>
       <p className="text-sm text-gray-500 dark:text-gray-300">
-        Guess the word in 6 tries. After each guess, the color of the tiles will
+        Guess the word in 5 tries. After each guess, the color of the tiles will
         change to show how close your guess was to the word.
       </p>
 
@@ -56,17 +56,72 @@ export const InfoModal = ({ isOpen, handleClose }: Props) => {
       <p className="text-sm text-gray-500 dark:text-gray-300">
         The letter U is not in the word in any spot.
       </p>
-
+      <p className="text-m text-gray-1000 dark:text-gray-300" style={{
+        marginTop: "15px"
+      }}>Controls:</p>
       <p className="mt-6 text-sm italic text-gray-500 dark:text-gray-300">
-        This is an open source version of the word guessing game we all know and
-        love -{' '}
-        <a
-          href="https://github.com/cwackerfuss/react-wordle"
-          className="font-bold underline"
+        <button
+            type="button"
+            className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+            onClick={async () => {}}
+            style={
+              {
+                width:"140px",
+                backgroundColor:"red",
+                color:"white",
+              }
+            }
+          >
+            (Re)Start Game
+        </button>
+        <p>to start/restart game (2 transactions)</p>
+        <button
+          type="button"
+          className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+          onClick={async () => {}}
+          style={
+            {
+              width:"90px",
+              backgroundColor:"blue",
+              color:"white",
+            }
+          }
         >
-          check out the code here
-        </a>{' '}
+          Set word
+        </button>
+        <p>to set the secret word (call to relayer)</p>
+        <button
+          type="button"
+          className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+          onClick={async () => {}}
+          style={
+            {
+              width:"90px",
+              backgroundColor:"green",
+              color:"white",
+            }
+          }
+        >
+          Claim win
+        </button>
+        <p>to check if you won</p>
+        <button
+          type="button"
+          className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+          onClick={async () => {}}
+          style={
+            {
+              width:"120px",
+              backgroundColor:"blue",
+              color:"white",
+            }
+          }
+        >
+          Get win token
+        </button>
+        <p>update your score</p>
       </p>
+      
     </BaseModal>
   )
 }
