@@ -1,259 +1,33 @@
-# Hardhat Template [![Open in Gitpod][gitpod-badge]][gitpod] [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat] [![License: MIT][license-badge]][license]
+# FHEordle
 
-[gitpod]: https://gitpod.io/#https://github.com/zama-ai/fhevm-hardhat-template
-[gitpod-badge]: https://img.shields.io/badge/Gitpod-Open%20in%20Gitpod-FFB45B?logo=gitpod
-[gha]: https://github.com/zama-ai/fhevm-hardhat-template/actions
-[gha-badge]: https://github.com/zama-ai/fhevm-hardhat-template/actions/workflows/ci.yml/badge.svg
-[hardhat]: https://hardhat.org/
-[hardhat-badge]: https://img.shields.io/badge/Built%20with-Hardhat-FFDB1C.svg
-[license]: https://opensource.org/licenses/MIT
-[license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+Our favorite game, but having state on FHE blockchain!
 
-A Hardhat-based template for developing Solidity smart contracts, with sensible defaults.
+## Repo
 
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile, run and test smart contracts
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript bindings for smart contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet implementation
-- [Solhint](https://github.com/protofire/solhint): code linter
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
+Repo includes smart contracts in `contracts`, tests in `test/fheordle` and frontend in `react-wordle`
 
-## Getting Started
+## How it works
 
-Click the [`Use this template`](https://github.com/zama-ai/fhevm-hardhat-template/generate) button at the top of the
-page to create a new repository with this repo as the initial state.
+## Word generation
 
-## Features
+There are N available words $w_0, \dots, w_{N-1}$. Smart contract generates $0 < [x] \leq N$, indicating the index of a word. There are a few ways to get the word $[w_{x}]$. One might write a FHE circuit to get it. And one might use a trusted relayer, which will receive reencrypted $x$, find $w_x$ and submit $[w_x]$ to blockchain. The implementation in this repo "mocks" the call to such relayer because of deployment simplicity https://github.com/kroist/encryptedWords/blob/4a07d9d48fdc13e37661567a7169903fdd533523/react-wordle/src/lib/blockchain.ts#L937
 
-This template builds upon the frameworks and libraries mentioned above, so for details about their specific features,
-please consult their respective documentations.
+## Word guessing
 
-For example, for Hardhat, you can refer to the [Hardhat Tutorial](https://hardhat.org/tutorial) and the
-[Hardhat Docs](https://hardhat.org/docs). You might be in particular interested in reading the
-[Testing Contracts](https://hardhat.org/tutorial/testing-contracts) section.
+Assume that the player tries the word $v$. And the alphabet is $\Sigma = \\{a, b, \dots, z\\}$. We define a FHE function:
 
-### Sensible Defaults
+$$f(v, [w_x]) = (mask_{=}, mask_{\Sigma})$$
 
-This template comes with sensible default configurations in the following files:
+Where, $mask_{=} = \\{i \in [0..4] |  v(i) = w_x(i)  \\}$$
 
-```text
-├── .editorconfig
-├── .eslintignore
-├── .eslintrc.yml
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solcover.js
-├── .solhint.json
-└── hardhat.config.ts
-```
+Where, $mask_{\Sigma} = \\{x \in \Sigma |  \exists_{i. j} v(i) = w_x(j) = x  \\}$
 
-### VSCode Integration
+Player submits the word, which is compared to $w_x$ in FHE. Player receives $mask_{=}, mask_{\Sigma}$. The first mask is a set of positions of word's letters equal to the $w_x$. The second mask is a set of letters, which are in both of the words at the same time.
 
-This template is IDE agnostic, but for the best user experience, you may want to use it in VSCode alongside Nomic
-Foundation's [Solidity extension](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity).
+When the $mask_{=} = \\{0, 1, 2, 3, 4\\}$, the player has guessed the word. Otherwise we can find correct/existing/non-existing letters in word.
 
-### GitHub Actions
+## Credits
 
-This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
-request made to the `main` branch.
+- smart contracts were implemented using TFHE by zama https://github.com/zama-ai/fhevm
+- frontend was cloned from https://github.com/cwackerfuss/react-wordle
 
-Note though that to make this work, you must use your `INFURA_API_KEY` and your `MNEMONIC` as GitHub secrets.
-
-You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
-
-## Usage
-
-### Pre Requisites
-
-Install [docker](https://docs.docker.com/engine/install/)
-
-Install [pnpm](https://pnpm.io/installation)
-
-Before being able to run any command, you need to create a `.env` file and set a BIP-39 compatible mnemonic as an
-environment variable. You can follow the example in `.env.example`. If you don't already have a mnemonic, you can use
-this [website](https://iancoleman.io/bip39/) to generate one.
-
-Then, proceed with installing dependencies:
-
-```sh
-pnpm install
-```
-
-### Start fhevm
-
-Start a local fhevm docker container that inlcudes everything needed to deploy FHE encrypted smart contracts
-
-```sh
-# In one terminal, keep it opened
-# The node logs are printed
-pnpm fhevm:start
-```
-
-To stop:
-
-```sh
-pnpm fhevm:stop
-```
-
-### Compile
-
-Compile the smart contracts with Hardhat:
-
-```sh
-pnpm compile
-```
-
-### TypeChain
-
-Compile the smart contracts and generate TypeChain bindings:
-
-```sh
-pnpm typechain
-```
-
-### List accounts
-
-From the mnemonic in .env file, list all the derived Ethereum adresses:
-
-```sh
-pnpm task:accounts
-```
-
-### Get some native coins
-
-In order to interact with the blockchain, one need some coins. This command will give coins to the first address derived
-from the mnemonic in .env file.
-
-```sh
-pnpm fhevm:faucet
-```
-
-<br />
-<details>
-  <summary>To get the first derived address from mnemonic</summary>
-<br />
-
-```sh
-pnpm task:getEthereumAddress
-```
-
-</details>
-<br />
-
-### Deploy
-
-Deploy the ERC20 to local network:
-
-```sh
-pnpm deploy:contracts
-```
-
-Notes: <br />
-
-<details>
-<summary>Error: cannot get the transaction for EncryptedERC20's previous deployment</summary>
-
-One can delete the local folder in deployments:
-
-```bash
-rm -r deployments/local/
-```
-
-</details>
-
-<details>
-<summary>Info: by default, the local network is used</summary>
-
-One can change the network, check [hardhat config file](./hardhat.config.ts).
-
-</details>
-<br />
-
-#### Mint
-
-Run the `mint` task on the local network:
-
-```sh
-pnpm task:mint --network local --mint 1000 --account alice
-```
-
-### Test
-
-Run the tests with Hardhat:
-
-```sh
-pnpm test
-```
-
-### Lint Solidity
-
-Lint the Solidity code:
-
-```sh
-pnpm lint:sol
-```
-
-### Lint TypeScript
-
-Lint the TypeScript code:
-
-```sh
-pnpm lint:ts
-```
-
-### Coverage
-
-Generate the code coverage report:
-
-```sh
-pnpm coverage
-```
-
-### Report Gas
-
-See the gas usage per unit test and average gas per method call:
-
-```sh
-REPORT_GAS=true pnpm test
-```
-
-### Clean
-
-Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
-
-```sh
-pnpm clean
-```
-
-### Tasks
-
-#### Deploy EncryptedERC20
-
-Deploy a new instance of the EncryptedERC20 contract via a task:
-
-```sh
-pnpm task:deployERC20
-```
-
-## Tips
-
-### Syntax Highlighting
-
-If you use VSCode, you can get Solidity syntax highlighting with the
-[hardhat-solidity](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity) extension.
-
-## Using GitPod
-
-[GitPod](https://www.gitpod.io/) is an open-source developer platform for remote development.
-
-To view the coverage report generated by `pnpm coverage`, just click `Go Live` from the status bar to turn the server
-on/off.
-
-## Local development with Docker
-
-Please check Evmos repository to be able to build FhEVM from sources.
-
-## License
-
-This project is licensed under MIT.
