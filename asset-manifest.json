@@ -1,16 +1,13 @@
 {
   "files": {
-    "main.css": "/encryptedWords/static/css/main.e84711b5.css",
-    "main.js": "/encryptedWords/static/js/main.5ea8f742.js",
-    "static/js/496.e99ae76d.chunk.js": "/encryptedWords/static/js/496.e99ae76d.chunk.js",
+    "main.css": "/encryptedWords/static/css/main.5ebb09e8.css",
+    "main.js": "/encryptedWords/static/js/main.53a21892.js",
+    "static/js/522.d3208bcd.chunk.js": "/encryptedWords/static/js/522.d3208bcd.chunk.js",
     "static/media/tfhe_bg.wasm": "/encryptedWords/static/media/tfhe_bg.0c2a7570832929460582.wasm",
-    "index.html": "/encryptedWords/index.html",
-    "main.e84711b5.css.map": "/encryptedWords/static/css/main.e84711b5.css.map",
-    "main.5ea8f742.js.map": "/encryptedWords/static/js/main.5ea8f742.js.map",
-    "496.e99ae76d.chunk.js.map": "/encryptedWords/static/js/496.e99ae76d.chunk.js.map"
+    "index.html": "/encryptedWords/index.html"
   },
   "entrypoints": [
-    "static/css/main.e84711b5.css",
-    "static/js/main.5ea8f742.js"
+    "static/css/main.5ebb09e8.css",
+    "static/js/main.53a21892.js"
   ]
 }
