@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/encryptedWords/static/css/main.5ebb09e8.css",
-    "main.js": "/encryptedWords/static/js/main.53a21892.js",
-    "static/js/522.d3208bcd.chunk.js": "/encryptedWords/static/js/522.d3208bcd.chunk.js",
-    "static/media/tfhe_bg.wasm": "/encryptedWords/static/media/tfhe_bg.0c2a7570832929460582.wasm",
-    "index.html": "/encryptedWords/index.html"
+    "main.css": "./static/css/main.5ebb09e8.css",
+    "main.js": "./static/js/main.a34c6ef6.js",
+    "static/js/522.d3208bcd.chunk.js": "./static/js/522.d3208bcd.chunk.js",
+    "static/media/tfhe_bg.wasm": "./static/media/tfhe_bg.0c2a7570832929460582.wasm",
+    "index.html": "./index.html"
   },
   "entrypoints": [
     "static/css/main.5ebb09e8.css",
-    "static/js/main.53a21892.js"
+    "static/js/main.a34c6ef6.js"
   ]
 }
