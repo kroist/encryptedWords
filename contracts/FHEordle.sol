@@ -7,8 +7,6 @@ import "fhevm/lib/TFHE.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract FHEordle is EIP712WithModifier {
-
-
     address public playerAddr;
     address public relayerAddr;
 
@@ -97,9 +95,7 @@ contract FHEordle is EIP712WithModifier {
         );
     }
 
-    function submitWord1(
-        euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 mask
-    ) public onlyRelayer {
+    function submitWord1(euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 mask) public onlyRelayer {
         require(!wordSubmitted, "word submitted");
         TFHE.optReq(
             TFHE.eq(
@@ -109,10 +105,7 @@ contract FHEordle is EIP712WithModifier {
                         TFHE.shl(1, TFHE.asEuint32(l1)),
                         TFHE.or(
                             TFHE.shl(1, TFHE.asEuint32(l2)),
-                            TFHE.or(
-                                TFHE.shl(1, TFHE.asEuint32(l3)),
-                                TFHE.shl(1, TFHE.asEuint32(l4))
-                            )
+                            TFHE.or(TFHE.shl(1, TFHE.asEuint32(l3)), TFHE.shl(1, TFHE.asEuint32(l4)))
                         )
                     )
                 ),
@@ -153,9 +146,7 @@ contract FHEordle is EIP712WithModifier {
         );
     }
 
-    function guessWord1(
-        euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 letterMask
-    ) public  {
+    function guessWord1(euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 letterMask) public {
         require(gameStarted, "game not started");
         require(nGuesses < 5, "cannot exceed five guesses!");
         euint8 g0 = TFHE.asEuint8(TFHE.eq(word1Letters[0], l0));
@@ -163,20 +154,10 @@ contract FHEordle is EIP712WithModifier {
         euint8 g2 = TFHE.asEuint8(TFHE.eq(word1Letters[2], l2));
         euint8 g3 = TFHE.asEuint8(TFHE.eq(word1Letters[3], l3));
         euint8 g4 = TFHE.asEuint8(TFHE.eq(word1Letters[4], l4));
-        euint8 eqMask = 
-            TFHE.or(
-                TFHE.shl(g0, 0),
-                TFHE.or(
-                    TFHE.shl(g1, 1),
-                    TFHE.or(
-                        TFHE.shl(g2, 2),
-                        TFHE.or(
-                            TFHE.shl(g3, 3),
-                            TFHE.shl(g4, 4)
-                        )
-                    )
-                )
-            );
+        euint8 eqMask = TFHE.or(
+            TFHE.shl(g0, 0),
+            TFHE.or(TFHE.shl(g1, 1), TFHE.or(TFHE.shl(g2, 2), TFHE.or(TFHE.shl(g3, 3), TFHE.shl(g4, 4))))
+        );
         eqMaskGuess[nGuesses] = eqMask;
         letterMaskGuess[nGuesses] = TFHE.and(word1LettersMask, letterMask);
         letterMaskGuessHist[nGuesses][0] = l0;
@@ -188,31 +169,24 @@ contract FHEordle is EIP712WithModifier {
         nGuesses += 1;
     }
 
-    function getGuess(uint8 guessN,
+    function getGuess(
+        uint8 guessN,
         bytes32 publicKey,
         bytes calldata signature
-    )
-        public view onlySignedPublicKey(publicKey, signature) onlyPlayer 
-        returns (bytes memory, bytes memory) {
+    ) public view onlySignedPublicKey(publicKey, signature) onlyPlayer returns (bytes memory, bytes memory) {
         require(guessN < nGuesses, "canno exceed nGuesses");
-        return (
-            TFHE.reencrypt(eqMaskGuess[guessN], publicKey),
-            TFHE.reencrypt(letterMaskGuess[guessN], publicKey)
-        );
+        return (TFHE.reencrypt(eqMaskGuess[guessN], publicKey), TFHE.reencrypt(letterMaskGuess[guessN], publicKey));
     }
 
-    function getLetterGuess(uint8 guessN,
+    function getLetterGuess(
+        uint8 guessN,
         uint8 letterN,
         bytes32 publicKey,
-        bytes calldata signature    
-    )
-        public view onlySignedPublicKey(publicKey, signature) onlyPlayer
-        returns (bytes memory) {
+        bytes calldata signature
+    ) public view onlySignedPublicKey(publicKey, signature) onlyPlayer returns (bytes memory) {
         require(guessN < nGuesses, "canno exceed nGuesses");
         require(letterN < 5, "cannot exceed 5");
-        return (
-            TFHE.reencrypt(letterMaskGuessHist[guessN][letterN], publicKey)
-        );
+        return (TFHE.reencrypt(letterMaskGuessHist[guessN][letterN], publicKey));
     }
 
     function claimWin(uint8 guessN) public onlyPlayer {
@@ -240,7 +214,22 @@ contract FHEordle is EIP712WithModifier {
         uint16 l3;
         uint16 l4;
         (l0, l1, l2, l3, l4) = revealWord();
-        word1 = uint32(l0) + uint32(l1) * 26  + uint32(l2)*26*26 + uint32(l3)*26*26*26 + uint32(l4)*26*26*26*26;
+        word1 =
+            uint32(l0) +
+            uint32(l1) *
+            26 +
+            uint32(l2) *
+            26 *
+            26 +
+            uint32(l3) *
+            26 *
+            26 *
+            26 +
+            uint32(l4) *
+            26 *
+            26 *
+            26 *
+            26;
     }
 
     function checkProof() public onlyPlayer {
@@ -261,5 +250,4 @@ contract FHEordle is EIP712WithModifier {
         require(msg.sender == playerAddr);
         _;
     }
-
 }

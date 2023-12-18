@@ -6,9 +6,7 @@ import "fhevm/abstracts/EIP712WithModifier.sol";
 import "./FHEordle.sol";
 import "fhevm/lib/TFHE.sol";
 
-
 contract FHEordleFactory is EIP712WithModifier {
-
     address public creator;
 
     mapping(address => address) public userLastContract;
@@ -52,7 +50,7 @@ contract FHEordleFactory is EIP712WithModifier {
         );
     }
 
-    function gameNotStarted() public view returns (bool){
+    function gameNotStarted() public view returns (bool) {
         if (userLastContract[msg.sender] != address(0)) {
             FHEordle game = FHEordle(userLastContract[msg.sender]);
             return game.playerWon() || (game.nGuesses() == 5);
@@ -69,7 +67,4 @@ contract FHEordleFactory is EIP712WithModifier {
             gamesWon[msg.sender] += 1;
         }
     }
-
-
-
 }
