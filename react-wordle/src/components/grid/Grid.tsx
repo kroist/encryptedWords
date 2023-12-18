@@ -4,7 +4,7 @@ import { CurrentRow } from './CurrentRow'
 import { EmptyRow } from './EmptyRow'
 
 type Props = {
-  guesses: [string,number,number][]
+  guesses: [string, number, number][]
   currentGuess: string
   isRevealing?: boolean
   currentRowClassName: string

@@ -1,23 +1,27 @@
 import './index.css'
 
+import { MetaMaskUIProvider } from '@metamask/sdk-react-ui'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
 import App from './App'
 import { AlertProvider } from './context/AlertContext'
 import reportWebVitals from './reportWebVitals'
-import { MetaMaskUIProvider } from '@metamask/sdk-react-ui';
 
 ReactDOM.render(
   <React.StrictMode>
-    <MetaMaskUIProvider sdkOptions={{
-      dappMetadata: {
-        name: "Demo UI React App",
-        url: window.location.host,
-      },
-      // checkInstallationImmediately: true,
-      // extensionOnly: true,
-    }}>
+    <MetaMaskUIProvider
+      sdkOptions={{
+        checkInstallationImmediately: true,
+        // preferDesktop: true,
+        dappMetadata: {
+          name: 'Demo UI React App',
+          url: process.env.GAME_URL,
+        },
+        // checkInstallationImmediately: true,
+        // extensionOnly: true,
+      }}
+    >
       <AlertProvider>
         <App />
       </AlertProvider>

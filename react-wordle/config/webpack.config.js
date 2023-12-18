@@ -303,6 +303,8 @@ module.exports = function (webpackEnv) {
       fallback: {
         'tfhe_bg.wasm': require.resolve('tfhe/tfhe_bg.wasm'),
         "buffer": require.resolve('buffer'),
+        "crypto": require.resolve("crypto-browserify"),
+        "stream": require.resolve("stream-browserify"),
       },
       // These are the reasonable defaults supported by the Node ecosystem.
       // We also include JSX as a common component filename extension to support

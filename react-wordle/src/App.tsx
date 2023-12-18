@@ -1,123 +1,73 @@
 import './App.css'
 
 import { ClockIcon } from '@heroicons/react/outline'
+import { useSDK } from '@metamask/sdk-react-ui'
 import { format } from 'date-fns'
 import { default as GraphemeSplitter } from 'grapheme-splitter'
 import { useEffect, useState } from 'react'
 import Div100vh from 'react-div-100vh'
-import { useSDK } from '@metamask/sdk-react-ui';
 
 import { AlertContainer } from './components/alerts/AlertContainer'
 import { Grid } from './components/grid/Grid'
 import { Keyboard } from './components/keyboard/Keyboard'
-import { DatePickerModal } from './components/modals/DatePickerModal'
 import { InfoModal } from './components/modals/InfoModal'
-import { MigrateStatsModal } from './components/modals/MigrateStatsModal'
-import { SettingsModal } from './components/modals/SettingsModal'
-import { StatsModal } from './components/modals/StatsModal'
 import { Navbar } from './components/navbar/Navbar'
 import {
   DATE_LOCALE,
   DISCOURAGE_INAPP_BROWSERS,
-  LONG_ALERT_TIME_MS,
   MAX_CHALLENGES,
   REVEAL_TIME_MS,
-  WELCOME_INFO_MODAL_MS,
 } from './constants/settings'
 import {
-  CORRECT_WORD_MESSAGE,
   DISCOURAGE_INAPP_BROWSER_TEXT,
-  GAME_COPIED_MESSAGE,
-  HARD_MODE_ALERT_MESSAGE,
   NOT_ENOUGH_LETTERS_MESSAGE,
-  SHARE_FAILURE_TEXT,
   WIN_MESSAGES,
   WORD_NOT_FOUND_MESSAGE,
 } from './constants/strings'
 import { useAlert } from './context/AlertContext'
-import { isInAppBrowser } from './lib/browser'
 import {
-  getStoredIsHighContrastMode,
-  loadGameStateFromLocalStorage,
-  saveGameStateToLocalStorage,
-  setStoredIsHighContrastMode,
-} from './lib/localStorage'
-import { addStatsForCompletedGame, loadStats } from './lib/stats'
-import {
-  findFirstUnusedReveal,
-  getGameDate,
-  getIsLatestGame,
-  isWinningWord,
-  isWordInWordList,
-  setGameDate,
-  solution,
-  solutionGameDate,
-  unicodeLength,
-} from './lib/words'
-
-import {
-  initFHE,
-  getIsGameFinished,
+  getGuesses,
   getIsGameStarted,
   guessWord,
-  getGuesses
+  initFHE,
 } from './lib/blockchain'
+import { isInAppBrowser } from './lib/browser'
 import { getGuessStatuses } from './lib/statuses'
+import {
+  getGameDate,
+  getIsLatestGame,
+  isWordInWordList,
+  solution,
+  unicodeLength,
+} from './lib/words'
 
 function App() {
   const isLatestGame = getIsLatestGame()
   const gameDate = getGameDate()
-  const prefersDarkMode = window.matchMedia(
-    '(prefers-color-scheme: dark)'
-  ).matches
-
   const { showError: showErrorAlert, showSuccess: showSuccessAlert } =
     useAlert()
-  const [isFhevmInitialized, setFhevmInitialized] = useState(false);
+  const [isFhevmInitialized, setFhevmInitialized] = useState(false)
   const [currentGuess, setCurrentGuess] = useState('')
   const [isGameWon, setIsGameWon] = useState(false)
   const [isGameStarted, setIsGameStarted] = useState(false)
-  const [isGameFinished, setIsGameFinished] = useState(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
-  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
-  const [isDatePickerModalOpen, setIsDatePickerModalOpen] = useState(false)
-  const [isMigrateStatsModalOpen, setIsMigrateStatsModalOpen] = useState(false)
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [currentRowClass, setCurrentRowClass] = useState('')
-  const [isGameLost, setIsGameLost] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(
-    localStorage.getItem('theme')
-      ? localStorage.getItem('theme') === 'dark'
-      : prefersDarkMode
-      ? true
-      : false
-  )
-  const [isHighContrastMode, setIsHighContrastMode] = useState(
-    getStoredIsHighContrastMode()
-  )
-  const [isRevealing, setIsRevealing] = useState(false)
-  const [guesses, setGuesses] = useState<[string,number,number][]>(() => {
-    const arr: [string, number, number][] = [];
-    return arr;
-  });
+  const isRevealing = false
+  const [guesses, setGuesses] = useState<[string, number, number][]>(() => {
+    const arr: [string, number, number][] = []
+    return arr
+  })
 
-  const [stats, setStats] = useState(() => loadStats())
 
-  const [isHardMode, setIsHardMode] = useState(
-    localStorage.getItem('gameMode')
-      ? localStorage.getItem('gameMode') === 'hard'
-      : false
-  )
-
-  const { sdk, connected, connecting, provider, chainId } = useSDK();
+  const { provider } = useSDK()
 
   useEffect(() => {
-    const changeChain = async() => {
+    const changeChain = async () => {
       try {
         await provider?.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x1F49' }],
-        });
+        })
       } catch (switchError: any) {
         // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
@@ -134,10 +84,10 @@ function App() {
                     decimals: 18,
                     name: 'ZAMA',
                     symbol: 'ZAMA',
-                  }
+                  },
                 },
               ],
-            });
+            })
           } catch (addError) {
             // handle "add" error
           }
@@ -145,57 +95,40 @@ function App() {
         // handle other "switch" errors
       }
     }
-    changeChain();
+    changeChain()
   })
 
   useEffect(() => {
-    console.log("HERE");
-    initFHE(provider!).then(() => {
-      console.log("INITED");
-      setFhevmInitialized(true);
-    })
-    .catch(() => setFhevmInitialized(false));
-  }, [provider]);
+    console.log('HERE')
+    initFHE(provider!)
+      .then(() => {
+        console.log('INITED')
+        setFhevmInitialized(true)
+      })
+      .catch(() => setFhevmInitialized(false))
+  }, [provider])
 
   useEffect(() => {
-    getIsGameFinished().then(res => {
-      setIsGameFinished(res);
-    })
-  }, [isFhevmInitialized])
-
-  useEffect(() => {
-    console.log("IS GAME STARTED");
-    getIsGameStarted().then(res => {
-      console.log(res);
-      setIsGameStarted(res);
+    console.log('IS GAME STARTED')
+    getIsGameStarted().then((res) => {
+      console.log(res)
+      setIsGameStarted(res)
     })
   }, [isFhevmInitialized])
 
   useEffect(() => {
     if (isFhevmInitialized) {
-      getGuesses([])
-      .then(curGuesses => {
-        setGuesses(curGuesses);
+      getGuesses([]).then((curGuesses) => {
+        setGuesses(curGuesses)
         if (curGuesses.length > 0) {
-          let statuses = getGuessStatuses(curGuesses.at(curGuesses.length-1)!);
-          if (statuses.filter(val => val === "correct").length === 5) {
-            setIsGameWon(true);
+          let statuses = getGuessStatuses(curGuesses.at(curGuesses.length - 1)!)
+          if (statuses.filter((val) => val === 'correct').length === 5) {
+            setIsGameWon(true)
           }
         }
       })
     }
-  }, [isFhevmInitialized]);
-
-
-  useEffect(() => {
-    // if no game state on load,
-    // show the user the how-to info modal
-    if (!loadGameStateFromLocalStorage(true)) {
-      setTimeout(() => {
-        setIsInfoModalOpen(true)
-      }, WELCOME_INFO_MODAL_MS)
-    }
-  })
+  }, [isFhevmInitialized])
 
   useEffect(() => {
     DISCOURAGE_INAPP_BROWSERS &&
@@ -207,28 +140,9 @@ function App() {
   }, [showErrorAlert])
 
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-
-    if (isHighContrastMode) {
-      document.documentElement.classList.add('high-contrast')
-    } else {
-      document.documentElement.classList.remove('high-contrast')
-    }
-  }, [isDarkMode, isHighContrastMode])
-
-  const handleDarkMode = (isDark: boolean) => {
-    setIsDarkMode(isDark)
-    localStorage.setItem('theme', isDark ? 'dark' : 'light')
-  }
-
-  const handleHighContrastMode = (isHighContrast: boolean) => {
-    setIsHighContrastMode(isHighContrast)
-    setStoredIsHighContrastMode(isHighContrast)
-  }
+    document.documentElement.classList.remove('dark')
+    document.documentElement.classList.remove('high-contrast')
+  })
 
   const clearCurrentRowClass = () => {
     setCurrentRowClass('')
@@ -241,20 +155,11 @@ function App() {
       const delayMs = REVEAL_TIME_MS * solution.length
 
       showSuccessAlert(winMessage, {
-        delayMs,
-        onClose: () => setIsStatsModalOpen(true),
+        delayMs
       })
     }
 
-    if (isGameLost) {
-      setTimeout(
-        () => {
-          setIsStatsModalOpen(true)
-        },
-        (solution.length + 1) * REVEAL_TIME_MS
-      )
-    }
-  }, [isGameWon, isGameLost, showSuccessAlert])
+  }, [isGameWon, showSuccessAlert])
 
   const onChar = (value: string) => {
     if (
@@ -273,7 +178,7 @@ function App() {
   }
 
   const onEnter = async () => {
-    if (isGameWon || isGameLost) {
+    if (isGameWon) {
       return
     }
 
@@ -291,55 +196,18 @@ function App() {
       })
     }
 
-    // setIsRevealing(true)
-    // // turn this back off after all
-    // // chars have been revealed
-    // setTimeout(() => {
-    //   setIsRevealing(false)
-    // }, REVEAL_TIME_MS * solution.length)
-
-    await guessWord(currentGuess);
-    const curGuesses = await getGuesses(guesses);
-    console.log("kek ", curGuesses);
-    setGuesses(curGuesses);
-    setCurrentGuess('');
-    let isFinished = await getIsGameFinished();
-    setIsGameFinished(isFinished);
-    let statuses = getGuessStatuses(curGuesses.at(curGuesses.length-1)!);
-    if (statuses.filter(val => val === "correct").length === 5) {
-      setIsGameWon(true);
+    await guessWord(currentGuess)
+    const curGuesses = await getGuesses(guesses)
+    console.log('kek ', curGuesses)
+    setGuesses(curGuesses)
+    setCurrentGuess('')
+    let statuses = getGuessStatuses(curGuesses.at(curGuesses.length - 1)!)
+    if (statuses.filter((val) => val === 'correct').length === 5) {
+      setIsGameWon(true)
     }
-    
-    // if (
-    //   unicodeLength(currentGuess) === solution.length &&
-    //   guesses.length < MAX_CHALLENGES &&
-    //   !isGameWon
-    // ) {
-    //   setGuesses([...guesses, currentGuess])
-    //   setCurrentGuess('')
-
-    //   if (winningWord) {
-    //     if (isLatestGame) {
-    //       setStats(addStatsForCompletedGame(stats, guesses.length))
-    //     }
-    //     return setIsGameWon(true)
-    //   }
-
-    //   if (guesses.length === MAX_CHALLENGES - 1) {
-    //     if (isLatestGame) {
-    //       setStats(addStatsForCompletedGame(stats, guesses.length + 1))
-    //     }
-    //     setIsGameLost(true)
-    //     showErrorAlert(CORRECT_WORD_MESSAGE(solution), {
-    //       persist: true,
-    //       delayMs: REVEAL_TIME_MS * solution.length + 1,
-    //     })
-    //   }
-    // }
   }
 
-  if (!isFhevmInitialized)
-    return null;
+  if (!isFhevmInitialized) return null
 
   return (
     <Div100vh>
@@ -363,11 +231,8 @@ function App() {
         )}
 
         <div className="mx-auto flex w-full grow flex-col px-1 pt-2 pb-8 sm:px-6 md:max-w-7xl lg:px-8 short:pb-2 short:pt-2">
-          
-          {
-            isGameStarted &&
-            (
-              <div>
+          {isGameStarted && (
+            <div>
               <div className="flex grow flex-col justify-center pb-6 short:pb-2">
                 <Grid
                   guesses={guesses}
@@ -382,13 +247,17 @@ function App() {
                 onEnter={onEnter}
                 isRevealing={isRevealing}
               />
-              </div>
-            )
-          }
-          <p style={{
-            textAlign: "center",
-            marginTop: "30px",
-          }}>If you are not seeing some updates, refresh the page! The state is fully saved on blockchain</p>
+            </div>
+          )}
+          <p
+            style={{
+              textAlign: 'center',
+              marginTop: '30px',
+            }}
+          >
+            If you are not seeing some updates, refresh the page! The state is
+            fully saved on blockchain
+          </p>
           <InfoModal
             isOpen={isInfoModalOpen}
             handleClose={() => setIsInfoModalOpen(false)}

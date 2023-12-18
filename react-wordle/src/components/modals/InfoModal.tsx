@@ -56,72 +56,68 @@ export const InfoModal = ({ isOpen, handleClose }: Props) => {
       <p className="text-sm text-gray-500 dark:text-gray-300">
         The letter U is not in the word in any spot.
       </p>
-      <p className="text-m text-gray-1000 dark:text-gray-300" style={{
-        marginTop: "15px"
-      }}>Controls:</p>
+      <p
+        className="text-m text-gray-1000 dark:text-gray-300"
+        style={{
+          marginTop: '15px',
+        }}
+      >
+        Controls:
+      </p>
       <p className="mt-6 text-sm italic text-gray-500 dark:text-gray-300">
         <button
-            type="button"
-            className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
-            onClick={async () => {}}
-            style={
-              {
-                width:"140px",
-                backgroundColor:"red",
-                color:"white",
-              }
-            }
-          >
-            (Re)Start Game
+          type="button"
+          className="mybutton ml-3 h-6 w-6 cursor-pointer dark:stroke-white"
+          onClick={async () => {}}
+          style={{
+            width: '140px',
+            backgroundColor: 'red',
+            color: 'white',
+          }}
+        >
+          (Re)Start Game
         </button>
         <p>to start/restart game (2 transactions)</p>
         <button
           type="button"
-          className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+          className="mybutton ml-3 h-6 w-6 cursor-pointer dark:stroke-white"
           onClick={async () => {}}
-          style={
-            {
-              width:"90px",
-              backgroundColor:"blue",
-              color:"white",
-            }
-          }
+          style={{
+            width: '90px',
+            backgroundColor: 'blue',
+            color: 'white',
+          }}
         >
           Set word
         </button>
         <p>to set the secret word (call to relayer)</p>
         <button
           type="button"
-          className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+          className="mybutton ml-3 h-6 w-6 cursor-pointer dark:stroke-white"
           onClick={async () => {}}
-          style={
-            {
-              width:"90px",
-              backgroundColor:"green",
-              color:"white",
-            }
-          }
+          style={{
+            width: '90px',
+            backgroundColor: 'green',
+            color: 'white',
+          }}
         >
           Claim win
         </button>
         <p>to check if you won</p>
         <button
           type="button"
-          className="ml-3 h-6 w-6 cursor-pointer dark:stroke-white mybutton"
+          className="mybutton ml-3 h-6 w-6 cursor-pointer dark:stroke-white"
           onClick={async () => {}}
-          style={
-            {
-              width:"120px",
-              backgroundColor:"blue",
-              color:"white",
-            }
-          }
+          style={{
+            width: '120px',
+            backgroundColor: 'blue',
+            color: 'white',
+          }}
         >
           Get win token
         </button>
         <p>update your score</p>
       </p>
-      
     </BaseModal>
   )
 }

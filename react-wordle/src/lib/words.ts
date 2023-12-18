@@ -1,3 +1,4 @@
+import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 import {
   addDays,
   differenceInDays,
@@ -7,7 +8,6 @@ import {
 } from 'date-fns'
 import { default as GraphemeSplitter } from 'grapheme-splitter'
 import queryString from 'query-string'
-import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 
 import { ENABLE_ARCHIVED_GAMES } from '../constants/settings'
 import { NOT_CONTAINED_MESSAGE, WRONG_SPOT_MESSAGE } from '../constants/strings'
@@ -28,8 +28,8 @@ export const isWordInWordList = (word: string) => {
 }
 
 export const isWinningWord = (word: string) => {
-  console.log(word);
-  console.log(solution);
+  console.log(word)
+  console.log(solution)
   return solution === word
 }
 
@@ -180,44 +180,46 @@ export const getIsLatestGame = () => {
 }
 
 export const wordAtId = (id: number) => {
-  return WORDS[id];
+  return WORDS[id]
 }
 
 export const wordAtIdToNumber = (id: number) => {
-  const word = WORDS[id];
-  return (word.charCodeAt(0)-97)
-    + (word.charCodeAt(1)-97) * 26
-    + (word.charCodeAt(2)-97) * 26 * 26
-    + (word.charCodeAt(3)-97) * 26 * 26 * 26
-    + (word.charCodeAt(4)-97) * 26 * 26 * 26 * 26;
+  const word = WORDS[id]
+  return (
+    word.charCodeAt(0) -
+    97 +
+    (word.charCodeAt(1) - 97) * 26 +
+    (word.charCodeAt(2) - 97) * 26 * 26 +
+    (word.charCodeAt(3) - 97) * 26 * 26 * 26 +
+    (word.charCodeAt(4) - 97) * 26 * 26 * 26 * 26
+  )
 }
 
 export const numberToWord = (number: number) => {
   return String.fromCharCode(
-    number%26+97,
-    (number/26)%26+97,
-    (number/26/26)%26+97,
-    (number/26/26/26)%26+97,
-    (number/26/26/26/26)%26+97,
+    (number % 26) + 97,
+    ((number / 26) % 26) + 97,
+    ((number / 26 / 26) % 26) + 97,
+    ((number / 26 / 26 / 26) % 26) + 97,
+    ((number / 26 / 26 / 26 / 26) % 26) + 97
   )
 }
 
 export const getProof = (id: number) => {
-  const wordsList = [];
-  const wordsSz = WORDS.length;
+  const wordsList = []
+  const wordsSz = WORDS.length
   for (let i = 0; i < wordsSz; i++) {
-    wordsList.push([i, wordAtIdToNumber(i)]);
+    wordsList.push([i, wordAtIdToNumber(i)])
   }
-  const tree = StandardMerkleTree.of(wordsList, ["uint16", "uint32"]);
-  const root = tree.root;
+  const tree = StandardMerkleTree.of(wordsList, ['uint16', 'uint32'])
+  const root = tree.root
   for (const [i, v] of tree.entries()) {
-    if (v[0] == id) {
-      const proof = tree.getProof(i);
-      return [root, proof];
+    if (v[0] === id) {
+      const proof = tree.getProof(i)
+      return [root, proof]
     }
   }
-  return ["", []];
-
+  return ['', []]
 }
 
 export const { solution, solutionGameDate, solutionIndex, tomorrow } =

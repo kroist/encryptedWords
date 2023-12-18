@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 
 import { DELETE_TEXT, ENTER_TEXT } from '../../constants/strings'
-import { getStatuses } from '../../lib/statuses'
 import { localeAwareUpperCase } from '../../lib/words'
 import { Key } from './Key'
 
@@ -12,13 +11,8 @@ type Props = {
   isRevealing?: boolean
 }
 
-export const Keyboard = ({
-  onChar,
-  onDelete,
-  onEnter,
-  isRevealing,
-}: Props) => {
-  const charStatuses: {[key: string]: string} = {};
+export const Keyboard = ({ onChar, onDelete, onEnter, isRevealing }: Props) => {
+  const charStatuses: { [key: string]: string } = {}
 
   const onClick = (value: string) => {
     if (value === 'ENTER') {
