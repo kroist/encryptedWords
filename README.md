@@ -2,6 +2,8 @@
 
 Our favorite game, but having state on FHE blockchain!
 
+Play at https://kroist.github.io/encryptedWords/
+
 ## Repo
 
 Repo includes smart contracts in `contracts`, full game integration tests in `test/fheordle` and game ui in `react-wordle`
