@@ -10,17 +10,14 @@ contract FHEordle is EIP712WithModifier {
     address public playerAddr;
     address public relayerAddr;
 
-    euint16 public word1Id;
-    euint16[5] public word1Letters;
-    euint32 public word1LettersMask;
+    euint16 private word1Id;
+    euint16[5] private word1Letters;
     uint32 public word1;
 
     uint8 public nGuesses;
-    euint8[5] public eqMaskGuess;
-    euint32[5] public letterMaskGuess;
-    euint16[5][5] public letterMaskGuessHist;
+    euint32[5] private letterMaskGuess;
+    euint16[5][5] private letterMaskGuessHist;
 
-    bytes32[] private proof;
     bytes32 private root;
     uint16 wordSetSz;
 
@@ -46,19 +43,13 @@ contract FHEordle is EIP712WithModifier {
             word1Id = TFHE.asEuint16(_word1Id);
         }
         for (uint8 i = 0; i < 5; i++) {
-            eqMaskGuess[i] = TFHE.asEuint8(0);
             letterMaskGuess[i] = TFHE.asEuint32(0);
-            // letterMaskGuessHist[i][0] = TFHE.asEuint16(0);
-            // letterMaskGuessHist[i][1] = TFHE.asEuint16(0);
-            // letterMaskGuessHist[i][2] = TFHE.asEuint16(0);
-            // letterMaskGuessHist[i][3] = TFHE.asEuint16(0);
-            // letterMaskGuessHist[i][4] = TFHE.asEuint16(0);
         }
         nGuesses = 0;
         wordSubmitted = false;
         gameStarted = false;
         playerWon = false;
-        proofChecked = true;
+        proofChecked = false;
         root = _root;
         word1 = 0;
     }
@@ -82,50 +73,26 @@ contract FHEordle is EIP712WithModifier {
         bytes calldata el1,
         bytes calldata el2,
         bytes calldata el3,
-        bytes calldata el4,
-        bytes calldata eMask
+        bytes calldata el4
     ) public {
         submitWord1(
             TFHE.asEuint16(el0),
             TFHE.asEuint16(el1),
             TFHE.asEuint16(el2),
             TFHE.asEuint16(el3),
-            TFHE.asEuint16(el4),
-            TFHE.asEuint32(eMask)
+            TFHE.asEuint16(el4)
         );
     }
 
-    function submitWord1(euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 mask) public onlyRelayer {
+    function submitWord1(euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4) public onlyRelayer {
         require(!wordSubmitted, "word submitted");
-        TFHE.optReq(
-            TFHE.eq(
-                TFHE.or(
-                    TFHE.shl(1, TFHE.asEuint32(l0)),
-                    TFHE.or(
-                        TFHE.shl(1, TFHE.asEuint32(l1)),
-                        TFHE.or(
-                            TFHE.shl(1, TFHE.asEuint32(l2)),
-                            TFHE.or(TFHE.shl(1, TFHE.asEuint32(l3)), TFHE.shl(1, TFHE.asEuint32(l4)))
-                        )
-                    )
-                ),
-                mask
-            )
-        );
         word1Letters[0] = l0;
         word1Letters[1] = l1;
         word1Letters[2] = l2;
         word1Letters[3] = l3;
         word1Letters[4] = l4;
-        word1LettersMask = mask;
         wordSubmitted = true;
         gameStarted = true;
-    }
-
-    function submitProof(bytes32[] calldata _proof) public onlyRelayer {
-        require(wordSubmitted, "word not submitted");
-        require(!gameStarted, "game started");
-        proof = _proof;
     }
 
     function guessWord1(
@@ -146,19 +113,20 @@ contract FHEordle is EIP712WithModifier {
         );
     }
 
-    function guessWord1(euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 letterMask) public {
+    function guessWord1(euint16 l0, euint16 l1, euint16 l2, euint16 l3, euint16 l4, euint32 letterMask) public onlyPlayer {
         require(gameStarted, "game not started");
         require(nGuesses < 5, "cannot exceed five guesses!");
-        euint8 g0 = TFHE.asEuint8(TFHE.eq(word1Letters[0], l0));
-        euint8 g1 = TFHE.asEuint8(TFHE.eq(word1Letters[1], l1));
-        euint8 g2 = TFHE.asEuint8(TFHE.eq(word1Letters[2], l2));
-        euint8 g3 = TFHE.asEuint8(TFHE.eq(word1Letters[3], l3));
-        euint8 g4 = TFHE.asEuint8(TFHE.eq(word1Letters[4], l4));
-        euint8 eqMask = TFHE.or(
-            TFHE.shl(g0, 0),
-            TFHE.or(TFHE.shl(g1, 1), TFHE.or(TFHE.shl(g2, 2), TFHE.or(TFHE.shl(g3, 3), TFHE.shl(g4, 4))))
-        );
-        eqMaskGuess[nGuesses] = eqMask;
+        euint32 word1LettersMask = 
+            TFHE.or(
+                TFHE.shl(1, TFHE.asEuint32(word1Letters[0])),
+                TFHE.or(
+                    TFHE.shl(1, TFHE.asEuint32(word1Letters[1])),
+                    TFHE.or(
+                        TFHE.shl(1, TFHE.asEuint32(word1Letters[2])),
+                        TFHE.or(TFHE.shl(1, TFHE.asEuint32(word1Letters[3])), TFHE.shl(1, TFHE.asEuint32(word1Letters[4])))
+                    )
+                )
+            );
         letterMaskGuess[nGuesses] = TFHE.and(word1LettersMask, letterMask);
         letterMaskGuessHist[nGuesses][0] = l0;
         letterMaskGuessHist[nGuesses][1] = l1;
@@ -169,13 +137,29 @@ contract FHEordle is EIP712WithModifier {
         nGuesses += 1;
     }
 
+    function getEqMask(
+        uint8 guessN 
+    ) internal view returns (euint8) {
+        euint8 g0 = TFHE.asEuint8(TFHE.eq(word1Letters[0], letterMaskGuessHist[guessN][0]));
+        euint8 g1 = TFHE.asEuint8(TFHE.eq(word1Letters[1], letterMaskGuessHist[guessN][1]));
+        euint8 g2 = TFHE.asEuint8(TFHE.eq(word1Letters[2], letterMaskGuessHist[guessN][2]));
+        euint8 g3 = TFHE.asEuint8(TFHE.eq(word1Letters[3], letterMaskGuessHist[guessN][3]));
+        euint8 g4 = TFHE.asEuint8(TFHE.eq(word1Letters[4], letterMaskGuessHist[guessN][4]));
+        euint8 eqMask = TFHE.or(
+            TFHE.shl(g0, 0),
+            TFHE.or(TFHE.shl(g1, 1), TFHE.or(TFHE.shl(g2, 2), TFHE.or(TFHE.shl(g3, 3), TFHE.shl(g4, 4))))
+        );
+        return eqMask;
+    }
+
     function getGuess(
         uint8 guessN,
         bytes32 publicKey,
         bytes calldata signature
     ) public view onlySignedPublicKey(publicKey, signature) onlyPlayer returns (bytes memory, bytes memory) {
         require(guessN < nGuesses, "canno exceed nGuesses");
-        return (TFHE.reencrypt(eqMaskGuess[guessN], publicKey), TFHE.reencrypt(letterMaskGuess[guessN], publicKey));
+        euint8 eqMask = getEqMask(guessN);
+        return (TFHE.reencrypt(eqMask, publicKey), TFHE.reencrypt(letterMaskGuess[guessN], publicKey));
     }
 
     function getLetterGuess(
@@ -191,7 +175,7 @@ contract FHEordle is EIP712WithModifier {
 
     function claimWin(uint8 guessN) public onlyPlayer {
         euint8 fullMask = TFHE.asEuint8(31);
-        bool compare = TFHE.decrypt(TFHE.eq(fullMask, eqMaskGuess[guessN]));
+        bool compare = TFHE.decrypt(TFHE.eq(fullMask, getEqMask(guessN)));
         if (compare) {
             playerWon = true;
         }
@@ -232,7 +216,7 @@ contract FHEordle is EIP712WithModifier {
             26;
     }
 
-    function checkProof() public onlyPlayer {
+    function checkProof(bytes32[] calldata proof) public onlyRelayer {
         assert(nGuesses == 5 || playerWon);
         uint16 wordId = TFHE.decrypt(word1Id);
         bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(wordId, word1))));

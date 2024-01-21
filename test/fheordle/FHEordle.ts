@@ -71,6 +71,8 @@ describe("FHEordle", function () {
     this.contractAddress = await contract.getAddress();
     this.instances = await createInstances(this.contractAddress, ethers, this.signers);
 
+
+    console.log("set word id");
     {
       const tx = await createTransaction(contract.setWord1Id);
       await tx.wait();
@@ -87,6 +89,8 @@ describe("FHEordle", function () {
       expect(word1Id).to.equal(3);
     }
 
+    console.log("submit word");
+
     // submit word letters (Bob-Relayer)
     {
       const bobContract = contract.connect(this.signers.bob);
@@ -101,29 +105,28 @@ describe("FHEordle", function () {
       const encl2 = this.instances.bob.encrypt16(l2);
       const encl3 = this.instances.bob.encrypt16(l3);
       const encl4 = this.instances.bob.encrypt16(l4);
-      const encMask = this.instances.bob.encrypt32(mask);
       const tx1 = await createTransaction(
-        bobContract["submitWord1(bytes,bytes,bytes,bytes,bytes,bytes)"],
+        bobContract["submitWord1(bytes,bytes,bytes,bytes,bytes)"],
         encl0,
         encl1,
         encl2,
         encl3,
         encl4,
-        encMask,
       );
       await tx1.wait();
     }
-    // submit proof
+
     {
-      const bobContract = contract.connect(this.signers.bob);
-      const tx1 = await createTransaction(bobContract.submitProof, proof);
-      await tx1.wait();
+      const wordSubmitted = await contract.wordSubmitted();
+      expect(wordSubmitted);
     }
 
     {
       const gameStarted = await contract.gameStarted();
       expect(gameStarted);
     }
+
+    console.log("guess 1");
 
     //guess n.1
     {
@@ -167,6 +170,7 @@ describe("FHEordle", function () {
       expect(letterMask).to.equal(1 << 20);
     }
 
+    console.log("guess 2");
     // guess 2
     {
       const l0 = 0;
@@ -209,6 +213,7 @@ describe("FHEordle", function () {
       expect(letterMask).to.equal(1589251);
     }
 
+    console.log("claim win");
     // claim win
     {
       const tx1 = await createTransaction(contract.claimWin, 1);
@@ -217,6 +222,7 @@ describe("FHEordle", function () {
       expect(hasWon);
     }
 
+    console.log("reveal word");
     // reveal word
     {
       const tx1 = await createTransaction(contract.revealWordAndStore);
@@ -225,12 +231,15 @@ describe("FHEordle", function () {
       expect(word).to.equal(ourWord);
     }
 
+    console.log("check proof");
     // check proof
     {
-      const tx1 = await createTransaction(contract.checkProof);
+      const bobContract = contract.connect(this.signers.bob);
+      const tx1 = await createTransaction(bobContract.checkProof, proof);
       await tx1.wait();
       const proofChecked = await contract.proofChecked();
       expect(proofChecked);
     }
+
   }).timeout(180000);
 });
