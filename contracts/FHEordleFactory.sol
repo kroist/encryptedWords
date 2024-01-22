@@ -32,6 +32,7 @@ contract FHEordleFactory is EIP712WithModifier {
                 _relayerAddr,
                 0,
                 0x918fd5f641d6c8bb0c5e07a42f975969c2575250dc3fb743346d1a3c11728bdd,
+                0xd3e7a12d252dcf5de57a406f0bd646217ec1f340bad869182e5b2bfadd086993,
                 5757
             )
         );
@@ -45,6 +46,7 @@ contract FHEordleFactory is EIP712WithModifier {
                 _relayerAddr,
                 3,
                 0x918fd5f641d6c8bb0c5e07a42f975969c2575250dc3fb743346d1a3c11728bdd,
+                0xd3e7a12d252dcf5de57a406f0bd646217ec1f340bad869182e5b2bfadd086993,
                 5757
             )
         );

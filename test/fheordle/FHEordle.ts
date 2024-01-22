@@ -7,12 +7,13 @@ import { createInstances } from "../instance";
 import { getSigners } from "../signers";
 import { createTransaction } from "../utils";
 import { WORDS } from "./wordslist";
+import { VALID_WORDS } from "./validWordsList";
 
-export function genProofAndRoot(values: any, key: any): [string, string[]] {
-  const tree = StandardMerkleTree.of(values, ["uint16", "uint32"]);
+export function genProofAndRoot(values: any, key: any, encoding: string[]): [string, string[]] {
+  const tree = StandardMerkleTree.of(values, encoding);
   const root = tree.root;
   for (const [i, v] of tree.entries()) {
-    if (v[0] == key) {
+    if (v[1] == key[1]) {
       const proof = tree.getProof(i);
       return [root, proof];
     }
@@ -20,8 +21,7 @@ export function genProofAndRoot(values: any, key: any): [string, string[]] {
   return ["", []];
 }
 
-export const wordAtIdToNumber = (id: number) => {
-  const word = WORDS[id];
+export const wordToNumber = (word: string) => {
   return (
     word.charCodeAt(0) -
     97 +
@@ -31,7 +31,6 @@ export const wordAtIdToNumber = (id: number) => {
     (word.charCodeAt(4) - 97) * 26 * 26 * 26 * 26
   );
 };
-console.log(WORDS[3]);
 
 describe("FHEordle", function () {
   before(async function () {
@@ -46,18 +45,22 @@ describe("FHEordle", function () {
     // id = 3
 
     const wordsList = [];
-    const wordsSz = WORDS.length;
-    for (let i = 0; i < wordsSz; i++) {
-      wordsList.push([i, wordAtIdToNumber(i)]);
+    for (let i = 0; i < WORDS.length; i++) {
+      wordsList.push([i, wordToNumber(WORDS[i])]);
     }
-    // console.log(wordsList);
-    // while (true) {
-    // }
-    const ourWord = wordsList[3][1];
-
-    const [_root, proof] = genProofAndRoot(wordsList, 3);
+    const [_root, proof] = genProofAndRoot(wordsList, [3, wordToNumber(WORDS[3])], ["uint16", "uint32"]);
+    expect(StandardMerkleTree.verify(_root, ["uint16", "uint32"], [3, wordToNumber(WORDS[3])], proof)).to.equal(true);
     console.log(_root);
-    console.log(wordsSz);
+    const ourWord = wordsList[3][1]; // "about"
+
+    const validWordsList = [];
+    for (let i = 0; i < VALID_WORDS.length; i++) {
+      validWordsList.push([0, wordToNumber(VALID_WORDS[i])]);
+    }
+    const [_validRoot, proofValid] = genProofAndRoot(validWordsList, [0, wordToNumber(VALID_WORDS[1])], ["uint8", "uint32"]);
+    expect(StandardMerkleTree.verify(_validRoot, ["uint8", "uint32"], [0, wordToNumber(VALID_WORDS[1])], proofValid)).to.equal(true);
+    console.log(_validRoot);
+
 
     const fheordleFactoryFactory = await ethers.getContractFactory("FHEordleFactory");
     const factoryContract: FHEordleFactory = await fheordleFactoryFactory.connect(this.signers.alice).deploy();
@@ -95,11 +98,11 @@ describe("FHEordle", function () {
     {
       const bobContract = contract.connect(this.signers.bob);
       const l0 = ourWord % 26;
-      const l1 = (ourWord / 26) % 26;
-      const l2 = (ourWord / 26 / 26) % 26;
-      const l3 = (ourWord / 26 / 26 / 26) % 26;
-      const l4 = (ourWord / 26 / 26 / 26 / 26) % 26;
-      const mask = (1 << l0) | (1 << l1) | (1 << l2) | (1 << l3) | (1 << l4);
+      const l1 = Math.floor(ourWord / 26) % 26;
+      const l2 = Math.floor(ourWord / 26 / 26) % 26;
+      const l3 = Math.floor(ourWord / 26 / 26 / 26) % 26;
+      const l4 = Math.floor(ourWord / 26 / 26 / 26 / 26) % 26;
+      console.log(l0, l1, l2, l3, l4);
       const encl0 = this.instances.bob.encrypt16(l0);
       const encl1 = this.instances.bob.encrypt16(l1);
       const encl2 = this.instances.bob.encrypt16(l2);
@@ -130,26 +133,18 @@ describe("FHEordle", function () {
 
     //guess n.1
     {
-      const l0 = 5;
-      const l1 = 5;
-      const l2 = 5;
+      // "rerun"
+      const l0 = 17;
+      const l1 = 4;
+      const l2 = 17;
       const l3 = 20;
-      const l4 = 5;
-      const mask = (1 << l0) | (1 << l1) | (1 << l2) | (1 << l3) | (1 << l4);
-      const encl0 = this.instances.alice.encrypt16(l0);
-      const encl1 = this.instances.alice.encrypt16(l1);
-      const encl2 = this.instances.alice.encrypt16(l2);
-      const encl3 = this.instances.alice.encrypt16(l3);
-      const encl4 = this.instances.alice.encrypt16(l4);
-      const encMask = this.instances.alice.encrypt32(mask);
+      const l4 = 13;
+      const word = l0 + 26*(l1+26*(l2+26*(l3+26*l4)));
+      const [_vR, proof] = genProofAndRoot(validWordsList, [0, word], ["uint8", "uint32"]);
       const tx1 = await createTransaction(
-        contract["guessWord1(bytes,bytes,bytes,bytes,bytes,bytes)"],
-        encl0,
-        encl1,
-        encl2,
-        encl3,
-        encl4,
-        encMask,
+        contract.guessWord1,
+        word,
+        proof
       );
       await tx1.wait();
     }
@@ -162,10 +157,8 @@ describe("FHEordle", function () {
 
     //check guess
     {
-      const token = this.instances.alice.getTokenSignature(this.contractAddress)!;
-      const tx1 = await contract.getGuess(0, token.publicKey, token.signature);
-      const eqMask = this.instances.alice.decrypt(this.contractAddress, tx1[0]);
-      const letterMask = this.instances.alice.decrypt(this.contractAddress, tx1[1]);
+      const eqMask = await contract.getGuess(0);
+      const letterMask = await contract.letterMaskGuess(0);
       expect(eqMask).to.equal(8);
       expect(letterMask).to.equal(1 << 20);
     }
@@ -173,26 +166,18 @@ describe("FHEordle", function () {
     console.log("guess 2");
     // guess 2
     {
+      // "about"
       const l0 = 0;
       const l1 = 1;
       const l2 = 14;
       const l3 = 20;
       const l4 = 19;
-      const mask = (1 << l0) | (1 << l1) | (1 << l2) | (1 << l3) | (1 << l4);
-      const encl0 = this.instances.alice.encrypt16(l0);
-      const encl1 = this.instances.alice.encrypt16(l1);
-      const encl2 = this.instances.alice.encrypt16(l2);
-      const encl3 = this.instances.alice.encrypt16(l3);
-      const encl4 = this.instances.alice.encrypt16(l4);
-      const encMask = this.instances.alice.encrypt32(mask);
+      const word = l0 + 26*(l1+26*(l2+26*(l3+26*l4)));
+      const [_validRoot, proof] = genProofAndRoot(validWordsList, [0, word], ["uint8", "uint32"]);
       const tx1 = await createTransaction(
-        contract["guessWord1(bytes,bytes,bytes,bytes,bytes,bytes)"],
-        encl0,
-        encl1,
-        encl2,
-        encl3,
-        encl4,
-        encMask,
+        contract.guessWord1,
+        word,
+        proof
       );
       await tx1.wait();
     }
@@ -205,10 +190,8 @@ describe("FHEordle", function () {
 
     // get guess
     {
-      const token = this.instances.alice.getTokenSignature(this.contractAddress)!;
-      const tx1 = await contract.getGuess(1, token.publicKey, token.signature);
-      const eqMask = this.instances.alice.decrypt(this.contractAddress, tx1[0]);
-      const letterMask = this.instances.alice.decrypt(this.contractAddress, tx1[1]);
+      const eqMask = await contract.getGuess(1);
+      const letterMask = await contract.letterMaskGuess(1);
       expect(eqMask).to.equal(31);
       expect(letterMask).to.equal(1589251);
     }
