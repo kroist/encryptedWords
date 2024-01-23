@@ -4,10 +4,10 @@ import { ethers } from "hardhat";
 
 import { FHEordle, FHEordleFactory, FHEordle__factory } from "../../types";
 import { createInstances } from "../instance";
-import { getSigners } from "../signers";
+import { getSigners, initSigners } from "../signers";
 import { createTransaction } from "../utils";
-import { WORDS } from "./wordslist";
 import { VALID_WORDS } from "./validWordsList";
+import { WORDS } from "./wordslist";
 
 export function genProofAndRoot(values: any, key: any, encoding: string[]): [string, string[]] {
   const tree = StandardMerkleTree.of(values, encoding);
@@ -34,7 +34,8 @@ export const wordToNumber = (word: string) => {
 
 describe("FHEordle", function () {
   before(async function () {
-    this.signers = await getSigners(ethers);
+    await initSigners();
+    this.signers = await getSigners();
   });
 
   it("should return correct masks", async function () {
@@ -61,11 +62,19 @@ describe("FHEordle", function () {
     expect(StandardMerkleTree.verify(_validRoot, ["uint8", "uint32"], [0, wordToNumber(VALID_WORDS[1])], proofValid)).to.equal(true);
     console.log(_validRoot);
 
+    const contractInitializerFactory = await ethers.getContractFactory("FHEordle");
+    const contractInitializer: FHEordle = await contractInitializerFactory.connect(this.signers.alice).deploy();
+    const contractInitializerAddress = await contractInitializer.getAddress();
 
     const fheordleFactoryFactory = await ethers.getContractFactory("FHEordleFactory");
-    const factoryContract: FHEordleFactory = await fheordleFactoryFactory.connect(this.signers.alice).deploy();
+    const factoryContract: FHEordleFactory = await fheordleFactoryFactory.connect(this.signers.alice).deploy(contractInitializerAddress);
     await factoryContract.waitForDeployment();
-    const txDeploy = await createTransaction(factoryContract.createTest, this.signers.bob.address);
+    const txDeploy = await createTransaction(
+        factoryContract.createTest,
+        this.signers.bob.address,
+        3,
+        "0xf172873c63909462ac4de545471fd3ad3e9eeadeec4608b92d16ce6b500704cc"
+    );
     await txDeploy.wait();
 
     const testContractAddress = await factoryContract.userLastContract(this.signers.alice.address);
@@ -73,15 +82,6 @@ describe("FHEordle", function () {
 
     this.contractAddress = await contract.getAddress();
     this.instances = await createInstances(this.contractAddress, ethers, this.signers);
-
-
-    console.log("set word id");
-    {
-      const tx = await createTransaction(contract.setWord1Id);
-      await tx.wait();
-      const word1IdSet = await contract.word1IdSet();
-      expect(word1IdSet);
-    }
 
     // get word id (Bob-Relayer)
     {
@@ -103,11 +103,11 @@ describe("FHEordle", function () {
       const l3 = Math.floor(ourWord / 26 / 26 / 26) % 26;
       const l4 = Math.floor(ourWord / 26 / 26 / 26 / 26) % 26;
       console.log(l0, l1, l2, l3, l4);
-      const encl0 = this.instances.bob.encrypt16(l0);
-      const encl1 = this.instances.bob.encrypt16(l1);
-      const encl2 = this.instances.bob.encrypt16(l2);
-      const encl3 = this.instances.bob.encrypt16(l3);
-      const encl4 = this.instances.bob.encrypt16(l4);
+      const encl0 = this.instances.bob.encrypt8(l0);
+      const encl1 = this.instances.bob.encrypt8(l1);
+      const encl2 = this.instances.bob.encrypt8(l2);
+      const encl3 = this.instances.bob.encrypt8(l3);
+      const encl4 = this.instances.bob.encrypt8(l4);
       const tx1 = await createTransaction(
         bobContract["submitWord1(bytes,bytes,bytes,bytes,bytes)"],
         encl0,
@@ -157,8 +157,7 @@ describe("FHEordle", function () {
 
     //check guess
     {
-      const eqMask = await contract.getGuess(0);
-      const letterMask = await contract.letterMaskGuess(0);
+      const [eqMask, letterMask] = await contract.getGuess(0);
       expect(eqMask).to.equal(8);
       expect(letterMask).to.equal(1 << 20);
     }
@@ -190,8 +189,7 @@ describe("FHEordle", function () {
 
     // get guess
     {
-      const eqMask = await contract.getGuess(1);
-      const letterMask = await contract.letterMaskGuess(1);
+      const [eqMask, letterMask] = await contract.getGuess(1);
       expect(eqMask).to.equal(31);
       expect(letterMask).to.equal(1589251);
     }

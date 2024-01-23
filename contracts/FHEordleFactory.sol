@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause-Clear
 
-pragma solidity 0.8.19;
+pragma solidity ^0.8.20;
 
 import "fhevm/abstracts/EIP712WithModifier.sol";
 import "./FHEordle.sol";
 import "fhevm/lib/TFHE.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
 
 contract FHEordleFactory is EIP712WithModifier {
     address public creator;
@@ -13,43 +14,32 @@ contract FHEordleFactory is EIP712WithModifier {
 
     mapping(address => uint32) public gamesWon;
     mapping(address => bool) public claimedWin;
+    address private immutable implementation;
 
-    constructor() EIP712WithModifier("Authorization token", "1") {
+    constructor(address _implementation) EIP712WithModifier("Authorization token", "1") {
         creator = msg.sender;
+        implementation = _implementation;
     }
 
-    function createGame(address _relayerAddr) public {
-        // if (userLastContract[msg.sender] != address(0)) {
-        //     FHEordle game = FHEordle(userLastContract[msg.sender]);
-        //     require(
-        //         game.playerWon() || (game.nGuesses() == 5),
-        //         "Previous game has not ended"
-        //     );
-        // }
-        userLastContract[msg.sender] = address(
-            new FHEordle(
+    function createGame(address _relayerAddr, bytes32 salt) public {
+        address cloneAdd = Clones.cloneDeterministic(implementation,salt);
+        FHEordle(cloneAdd).initialize(
                 msg.sender,
                 _relayerAddr,
-                0,
-                0x918fd5f641d6c8bb0c5e07a42f975969c2575250dc3fb743346d1a3c11728bdd,
-                0xd3e7a12d252dcf5de57a406f0bd646217ec1f340bad869182e5b2bfadd086993,
-                5757
-            )
+                0
         );
+        userLastContract[msg.sender] = cloneAdd;
     }
 
-    function createTest(address _relayerAddr) public {
+    function createTest(address _relayerAddr, uint16 id, bytes32 salt) public {
         require(userLastContract[msg.sender] == address(0), "kek");
-        userLastContract[msg.sender] = address(
-            new FHEordle(
+        address cloneAdd = Clones.cloneDeterministic(implementation,salt);
+        FHEordle(cloneAdd).initialize(
                 msg.sender,
                 _relayerAddr,
-                3,
-                0x918fd5f641d6c8bb0c5e07a42f975969c2575250dc3fb743346d1a3c11728bdd,
-                0xd3e7a12d252dcf5de57a406f0bd646217ec1f340bad869182e5b2bfadd086993,
-                5757
-            )
+                id
         );
+        userLastContract[msg.sender] = cloneAdd;
     }
 
     function gameNotStarted() public view returns (bool) {
