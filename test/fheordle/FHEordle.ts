@@ -86,7 +86,7 @@ describe("FHEordle", function () {
     // get word id (Bob-Relayer)
     {
       const bobContract = contract.connect(this.signers.bob);
-      const token = this.instances.bob.getTokenSignature(this.contractAddress)!;
+      const token = this.instances.bob.getPublicKey(this.contractAddress)!;
       const tx1 = await bobContract.getWord1Id(token.publicKey, token.signature);
       const word1Id = this.instances.bob.decrypt(this.contractAddress, tx1);
       expect(word1Id).to.equal(3);
@@ -207,7 +207,7 @@ describe("FHEordle", function () {
     // reveal word
     {
       const tx1 = await createTransaction(contract.revealWordAndStore);
-      await tx1.wait();
+      await tx1.wait(5);
       const word = await contract.word1();
       expect(word).to.equal(ourWord);
     }

@@ -66,6 +66,7 @@ function getRemappings() {
 
 const chainIds = {
   zama: 8009,
+  inco: 9090,
   local: 9000,
   localNetwork1: 9000,
   multipleValidatorTestnet: 8009,
@@ -85,6 +86,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
     case "zama":
       jsonRpcUrl = "https://devnet.zama.ai";
+      break;
+    case "inco":
+      jsonRpcUrl = "https://testnet.inco.org";
       break;
   }
   return {
@@ -133,6 +137,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     zama: getChainConfig("zama"),
+    inco: getChainConfig("inco"),
     localDev: getChainConfig("local"),
     local: getChainConfig("local"),
     localNetwork1: getChainConfig("localNetwork1"),
