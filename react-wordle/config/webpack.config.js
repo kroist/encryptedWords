@@ -757,7 +757,7 @@ module.exports = function (webpackEnv) {
             Buffer: ['buffer', 'Buffer'],
         }),
         new webpack.ProvidePlugin({
-            process: 'process/browser',
+            process: 'process/browser.js',
         }),
     ].filter(Boolean),
     // Turn off performance processing because we utilize

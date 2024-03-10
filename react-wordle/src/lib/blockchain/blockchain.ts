@@ -3,7 +3,7 @@ import { Contract } from 'ethers'
 import { providers, utils } from 'ethers'
 import { FhevmInstance, createInstance, initFhevm } from 'fhevmjs/web'
 
-import { numberToWord, wordAtIdToNumber } from './words'
+import { numberToWord, wordAtIdToNumber } from '../words'
 
 const factoryContractAbi = [
   {
@@ -840,7 +840,6 @@ const contractAbi = [
   },
 ]
 
-// const relayerAddr = '0x95D095295182679a0187Ed1715BF636E770A3f3E'
 const factoryContractAddr = '0x67aF4754ae255Cc5A6653BBd1d602F4cD4E7668B'
 
 let fhevmInstance: FhevmInstance
