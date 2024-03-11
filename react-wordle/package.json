@@ -6,7 +6,7 @@
     "build": "node scripts/build.js",
     "fix": "prettier --write src",
     "lint": "prettier --check src",
-    "start": "node scripts/start.js",
+    "start": "ABOBUS=123 REACT_APP_GAME_NAME=FHEordle REACT_APP_WALLETCONNECT_PROJECT_ID=9b93c73971c07738b323462cd2ea9a6f node scripts/start.js",
     "test": "node scripts/test.js"
   },
   "dependencies": {

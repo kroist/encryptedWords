@@ -48,6 +48,8 @@ import { config } from './lib/blockchain/config'
 import Game from './components/Game'
 
 const queryClient = new QueryClient();
+console.log(process.env.REACT_APP_WALLETCONNECT_PROJECT_ID!);
+console.log(process.env);
 
 function App() {
   return (

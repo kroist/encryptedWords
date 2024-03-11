@@ -4,6 +4,8 @@ import { InfoModal } from "./modals/InfoModal";
 import { useState } from "react";
 import { Navbar } from "./navbar/Navbar";
 import { useAccount } from "wagmi";
+import SelectGameButton from "./buttons/SelectGameButton";
+import GamesWon from "./stats/GamesWon";
 
 function Game() {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -14,17 +16,13 @@ function Game() {
       <div className="flex h-full flex-col">
         <Navbar
           setIsInfoModalOpen={setIsInfoModalOpen}
-        / >
+        />
         {
           isConnected ?
-          <p
-            style={{
-              textAlign: 'center',
-              marginTop: '30px',
-            }}
-          >
-            Game should be started
-          </p>
+          <div className="flex h-full flex-col">
+            <SelectGameButton />
+            <GamesWon />
+          </div>
           :
           <p
             style={{

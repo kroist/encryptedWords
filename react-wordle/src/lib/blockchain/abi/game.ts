@@ -1,649 +1,521 @@
 
 const gameAbi = [
     {
-      inputs: [
-        {
-          internalType: 'address',
-          name: '_playerAddr',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: '_relayerAddr',
-          type: 'address',
-        },
-        {
-          internalType: 'uint16',
-          name: '_word1Id',
-          type: 'uint16',
-        },
-        {
-          internalType: 'bytes32',
-          name: '_root',
-          type: 'bytes32',
-        },
-        {
-          internalType: 'uint16',
-          name: '_wordSetSz',
-          type: 'uint16',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'constructor',
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      inputs: [],
-      name: 'InvalidShortString',
-      type: 'error',
+      "inputs": [],
+      "name": "ECDSAInvalidSignature",
+      "type": "error"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'string',
-          name: 'str',
-          type: 'string',
-        },
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
       ],
-      name: 'StringTooLong',
-      type: 'error',
+      "name": "ECDSAInvalidSignatureLength",
+      "type": "error"
     },
     {
-      anonymous: false,
-      inputs: [],
-      name: 'EIP712DomainChanged',
-      type: 'event',
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ECDSAInvalidSignatureS",
+      "type": "error"
     },
     {
-      inputs: [],
-      name: 'checkProof',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "InvalidInitialization",
+      "type": "error"
     },
     {
-      inputs: [
-        {
-          internalType: 'uint8',
-          name: 'guessN',
-          type: 'uint8',
-        },
-      ],
-      name: 'claimWin',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "InvalidShortString",
+      "type": "error"
     },
     {
-      inputs: [],
-      name: 'eip712Domain',
-      outputs: [
-        {
-          internalType: 'bytes1',
-          name: 'fields',
-          type: 'bytes1',
-        },
-        {
-          internalType: 'string',
-          name: 'name',
-          type: 'string',
-        },
-        {
-          internalType: 'string',
-          name: 'version',
-          type: 'string',
-        },
-        {
-          internalType: 'uint256',
-          name: 'chainId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'address',
-          name: 'verifyingContract',
-          type: 'address',
-        },
-        {
-          internalType: 'bytes32',
-          name: 'salt',
-          type: 'bytes32',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'extensions',
-          type: 'uint256[]',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "inputs": [],
+      "name": "NotInitializing",
+      "type": "error"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "string",
+          "name": "str",
+          "type": "string"
+        }
       ],
-      name: 'eqMaskGuess',
-      outputs: [
-        {
-          internalType: 'euint8',
-          name: '',
-          type: 'uint256',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "StringTooLong",
+      "type": "error"
     },
     {
-      inputs: [],
-      name: 'gameStarted',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "anonymous": false,
+      "inputs": [],
+      "name": "EIP712DomainChanged",
+      "type": "event"
     },
     {
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          internalType: 'uint8',
-          name: 'guessN',
-          type: 'uint8',
-        },
-        {
-          internalType: 'bytes32',
-          name: 'publicKey',
-          type: 'bytes32',
-        },
-        {
-          internalType: 'bytes',
-          name: 'signature',
-          type: 'bytes',
-        },
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "version",
+          "type": "uint64"
+        }
       ],
-      name: 'getGuess',
-      outputs: [
-        {
-          internalType: 'bytes',
-          name: '',
-          type: 'bytes',
-        },
-        {
-          internalType: 'bytes',
-          name: '',
-          type: 'bytes',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "Initialized",
+      "type": "event"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint8',
-          name: 'guessN',
-          type: 'uint8',
-        },
-        {
-          internalType: 'uint8',
-          name: 'letterN',
-          type: 'uint8',
-        },
-        {
-          internalType: 'bytes32',
-          name: 'publicKey',
-          type: 'bytes32',
-        },
-        {
-          internalType: 'bytes',
-          name: 'signature',
-          type: 'bytes',
-        },
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        }
       ],
-      name: 'getLetterGuess',
-      outputs: [
-        {
-          internalType: 'bytes',
-          name: '',
-          type: 'bytes',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "checkProof",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'publicKey',
-          type: 'bytes32',
-        },
-        {
-          internalType: 'bytes',
-          name: 'signature',
-          type: 'bytes',
-        },
+          "internalType": "uint8",
+          "name": "guessN",
+          "type": "uint8"
+        }
       ],
-      name: 'getWord1Id',
-      outputs: [
-        {
-          internalType: 'bytes',
-          name: '',
-          type: 'bytes',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "claimWin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "eip712Domain",
+      "outputs": [
         {
-          internalType: 'bytes',
-          name: 'el0',
-          type: 'bytes',
+          "internalType": "bytes1",
+          "name": "fields",
+          "type": "bytes1"
         },
         {
-          internalType: 'bytes',
-          name: 'el1',
-          type: 'bytes',
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
         },
         {
-          internalType: 'bytes',
-          name: 'el2',
-          type: 'bytes',
+          "internalType": "string",
+          "name": "version",
+          "type": "string"
         },
         {
-          internalType: 'bytes',
-          name: 'el3',
-          type: 'bytes',
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
         },
         {
-          internalType: 'bytes',
-          name: 'el4',
-          type: 'bytes',
+          "internalType": "address",
+          "name": "verifyingContract",
+          "type": "address"
         },
         {
-          internalType: 'bytes',
-          name: 'eMask',
-          type: 'bytes',
+          "internalType": "bytes32",
+          "name": "salt",
+          "type": "bytes32"
         },
+        {
+          "internalType": "uint256[]",
+          "name": "extensions",
+          "type": "uint256[]"
+        }
       ],
-      name: 'guessWord1',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "gameStarted",
+      "outputs": [
         {
-          internalType: 'euint16',
-          name: 'l0',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l1',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l2',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l3',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l4',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint32',
-          name: 'letterMask',
-          type: 'uint256',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      name: 'guessWord1',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint8",
+          "name": "guessN",
+          "type": "uint8"
+        }
       ],
-      name: 'letterMaskGuess',
-      outputs: [
+      "name": "getGuess",
+      "outputs": [
         {
-          internalType: 'euint32',
-          name: '',
-          type: 'uint256',
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
         },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
+          "internalType": "bytes32",
+          "name": "publicKey",
+          "type": "bytes32"
         },
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
       ],
-      name: 'letterMaskGuessHist',
-      outputs: [
+      "name": "getWord1Id",
+      "outputs": [
         {
-          internalType: 'euint16',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'nGuesses',
-      outputs: [
+      "inputs": [
         {
-          internalType: 'uint8',
-          name: '',
-          type: 'uint8',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "guessHist",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'playerAddr',
-      outputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
+          "internalType": "uint32",
+          "name": "word",
+          "type": "uint32"
         },
+        {
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "guessWord1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'playerWon',
-      outputs: [
+      "inputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
+          "internalType": "address",
+          "name": "_playerAddr",
+          "type": "address"
         },
+        {
+          "internalType": "address",
+          "name": "_relayerAddr",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_testFlag",
+          "type": "uint16"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'proofChecked',
-      outputs: [
+      "inputs": [],
+      "name": "nGuesses",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'relayerAddr',
-      outputs: [
+      "inputs": [],
+      "name": "playerAddr",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'revealWord',
-      outputs: [
+      "inputs": [],
+      "name": "playerWon",
+      "outputs": [
         {
-          internalType: 'uint16',
-          name: '',
-          type: 'uint16',
-        },
-        {
-          internalType: 'uint16',
-          name: '',
-          type: 'uint16',
-        },
-        {
-          internalType: 'uint16',
-          name: '',
-          type: 'uint16',
-        },
-        {
-          internalType: 'uint16',
-          name: '',
-          type: 'uint16',
-        },
-        {
-          internalType: 'uint16',
-          name: '',
-          type: 'uint16',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'revealWordAndStore',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "proofChecked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'setWord1Id',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "relayerAddr",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "revealWord",
+      "outputs": [
         {
-          internalType: 'bytes32[]',
-          name: '_proof',
-          type: 'bytes32[]',
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
         },
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
       ],
-      name: 'submitProof',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
-        {
-          internalType: 'bytes',
-          name: 'el0',
-          type: 'bytes',
-        },
-        {
-          internalType: 'bytes',
-          name: 'el1',
-          type: 'bytes',
-        },
-        {
-          internalType: 'bytes',
-          name: 'el2',
-          type: 'bytes',
-        },
-        {
-          internalType: 'bytes',
-          name: 'el3',
-          type: 'bytes',
-        },
-        {
-          internalType: 'bytes',
-          name: 'el4',
-          type: 'bytes',
-        },
-        {
-          internalType: 'bytes',
-          name: 'eMask',
-          type: 'bytes',
-        },
-      ],
-      name: 'submitWord1',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "revealWordAndStore",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "root",
+      "outputs": [
         {
-          internalType: 'euint16',
-          name: 'l0',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l1',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l2',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l3',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint16',
-          name: 'l4',
-          type: 'uint256',
-        },
-        {
-          internalType: 'euint32',
-          name: 'mask',
-          type: 'uint256',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      name: 'submitWord1',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'word1',
-      outputs: [
+      "inputs": [],
+      "name": "rootAllowed",
+      "outputs": [
         {
-          internalType: 'uint32',
-          name: '',
-          type: 'uint32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'word1Id',
-      outputs: [
+      "inputs": [
         {
-          internalType: 'euint16',
-          name: '',
-          type: 'uint256',
+          "internalType": "bytes",
+          "name": "el0",
+          "type": "bytes"
         },
+        {
+          "internalType": "bytes",
+          "name": "el1",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "el2",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "el3",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "el4",
+          "type": "bytes"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "submitWord1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'word1IdSet',
-      outputs: [
+      "inputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
+          "internalType": "euint8",
+          "name": "l0",
+          "type": "uint256"
         },
+        {
+          "internalType": "euint8",
+          "name": "l1",
+          "type": "uint256"
+        },
+        {
+          "internalType": "euint8",
+          "name": "l2",
+          "type": "uint256"
+        },
+        {
+          "internalType": "euint8",
+          "name": "l3",
+          "type": "uint256"
+        },
+        {
+          "internalType": "euint8",
+          "name": "l4",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "name": "submitWord1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [],
+      "name": "testFlag",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
       ],
-      name: 'word1Letters',
-      outputs: [
-        {
-          internalType: 'euint16',
-          name: '',
-          type: 'uint256',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'word1LettersMask',
-      outputs: [
+      "inputs": [],
+      "name": "word1",
+      "outputs": [
         {
-          internalType: 'euint32',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'wordSubmitted',
-      outputs: [
+      "inputs": [],
+      "name": "wordSetSz",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
+    {
+      "inputs": [],
+      "name": "wordSubmitted",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ]
 
 export const gameAbi;
