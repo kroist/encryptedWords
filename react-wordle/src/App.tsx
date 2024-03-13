@@ -66,7 +66,7 @@ function App() {
       try {
         await provider?.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x1F49' }],
+          params: [{ chainId: '0x2382' }],
         })
       } catch (switchError: any) {
         // This error code indicates that the chain has not been added to MetaMask.
@@ -76,14 +76,14 @@ function App() {
               method: 'wallet_addEthereumChain',
               params: [
                 {
-                  chainId: '0x1F49',
-                  chainName: 'Zama Network',
-                  rpcUrls: ['https://devnet.zama.ai'],
-                  blockExplorerUrls: ['https://main.explorer.zama.ai'],
+                  chainId: '0x2382',
+                  chainName: 'Inco Gentry Testnet',
+                  rpcUrls: ['https://testnet.inco.org'],
+                  blockExplorerUrls: ['https://explorer.testnet.inco.org'],
                   nativeCurrency: {
                     decimals: 18,
-                    name: 'ZAMA',
-                    symbol: 'ZAMA',
+                    name: 'INCO',
+                    symbol: 'INCO',
                   },
                 },
               ],
@@ -114,6 +114,7 @@ function App() {
       console.log(res)
       setIsGameStarted(res)
     })
+    .catch((err) => {})
   }, [isFhevmInitialized])
 
   useEffect(() => {
